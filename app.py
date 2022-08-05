@@ -25,12 +25,23 @@ def index():
     print("User visited index page")
     return render_template("index.html", userTables=userTables, categories=categories)
 
-# @app.route("/add")
-# def add():
+@app.route("/add", methods=["GET", "POST"])
+def add():
+    print("User visited add page")
     if request.method == "POST":
         table = request.form.get("table")
         category = request.form.get("category")
-    print("User visited add page")
+        if len(db.execute("SELECT main_table FROM userTables WHERE user_id = 522 AND main_table = ?", table)) == 0:
+            print("Dictionary is empty")
+        else:
+            print("Dictionary exists")
+            if len(db.execute("SELECT main_table FROM userTables WHERE user_id = 522 AND category = ?", category)) == 0:
+                db.execute("INSERT INTO userTables (user_id, main_table, category) VALUES (522, ?, ?)", table, category)
+                print("Inserted new category into table")
+            else:
+                print("Such category already exists")
+                
+        return render_template("add.html")
     return render_template("add.html")
 
 

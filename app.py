@@ -32,7 +32,8 @@ def add():
         table = request.form.get("table")
         category = request.form.get("category")
         if len(db.execute("SELECT main_table FROM userTables WHERE user_id = 522 AND main_table = ?", table)) == 0:
-            print("Dictionary is empty")
+            print("Dictionary is empty. Creating new table")
+            db.execute("INSERT INTO userTables (user_id, main_table, category) VALUES (522, ?, ?)", table, category)
         else:
             print("Dictionary exists")
             if len(db.execute("SELECT main_table FROM userTables WHERE user_id = 522 AND category = ?", category)) == 0:

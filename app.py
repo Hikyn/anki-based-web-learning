@@ -13,6 +13,18 @@ app.config["TEMPLATES_AUTO_RELOAD"] = True
 # Configure CS50 Library to use SQLite database
 db = SQL("sqlite:///app.db")
 
+def addTableToSQL(table, category):
+    if len(db.execute("SELECT main_table FROM userTables WHERE user_id = 522 AND main_table = ?", table)) == 0:
+        print("Dictionary is empty. Creating new table")
+        db.execute("INSERT INTO userTables (user_id, main_table, category) VALUES (522, ?, ?)", table, category)
+    else:
+        print("Dictionary exists")
+        if len(db.execute("SELECT main_table FROM userTables WHERE user_id = 522 AND category = ?", category)) == 0:
+            db.execute("INSERT INTO userTables (user_id, main_table, category) VALUES (522, ?, ?)", table, category)
+            print("Inserted new category into table")
+        else:
+            print("Such category already exists")
+
 @app.route("/")
 def index():
     userTables = db.execute("SELECT DISTINCT main_table FROM userTables WHERE user_id = 522 ORDER BY main_table ASC")
@@ -31,16 +43,9 @@ def add():
     if request.method == "POST":
         table = request.form.get("table")
         category = request.form.get("category")
-        if len(db.execute("SELECT main_table FROM userTables WHERE user_id = 522 AND main_table = ?", table)) == 0:
-            print("Dictionary is empty. Creating new table")
-            db.execute("INSERT INTO userTables (user_id, main_table, category) VALUES (522, ?, ?)", table, category)
-        else:
-            print("Dictionary exists")
-            if len(db.execute("SELECT main_table FROM userTables WHERE user_id = 522 AND category = ?", category)) == 0:
-                db.execute("INSERT INTO userTables (user_id, main_table, category) VALUES (522, ?, ?)", table, category)
-                print("Inserted new category into table")
-            else:
-                print("Such category already exists")
+
+        # Create a function that does everything below so it will take less space
+        addTableToSQL(table, category)
                 
         return render_template("add.html")
     return render_template("add.html")
@@ -49,4 +54,4 @@ def add():
 # Tests for urls at the start of flask server
 with app.test_request_context():
     print(url_for("index"))
-    # print(url_for("add"))
+    print(url_for("add"))

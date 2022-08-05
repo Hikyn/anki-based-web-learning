@@ -13,4 +13,11 @@
     text-align: center;
 }
 
-.btn-primary
+.btn-center {
+    margin: auto;
+    text-align: center;
+}
+
+.navbar {
+    margin-left: 2%;
+}

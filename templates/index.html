@@ -15,45 +15,28 @@
             </div>
         </div>
         <div class="row">
+            {% for table in userTables %}
             <div class="row">
                 <div class="col-sm-2 header-1">
                     <div class="card card-block">
-                        <a class="btn btn-secondary" href="#detail1" role="button" data-bs-toggle="collapse" aria-expanded="false" aria-controls="detail1">
-                            English A1
+                        <a class="btn btn-secondary" href="#table{{ table["main_table"] }}" role="button" data-bs-toggle="collapse" aria-expanded="false" aria-controls="table{{ table["main_table"] }}">
+                            {{ table["main_table"] }}
                         </a>
                     </div>
-                    <div class="col-sm-12 flex-md-last collapse" id="detail1">
+                    <div class="col-sm-12 flex-md-last collapse" id="table{{ table["main_table"] }}">
                         <div class="card card-body">
-                            {% for category in EnglishA1 %}
+                            {% for unit in categories %}
+                            {% if table["main_table"] in unit["main_table"] %}
                             <p>
-                                {{ category["category"] }}
+                                {{ unit["category"] }}
                             </p>
+                            {% endif %}
                             {% endfor %}
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="row">
-                <div class="col-sm-2 header-1">
-                    <div class="card card-block">
-                        <a class="btn btn-secondary" href="#detail2" role="button" data-bs-toggle="collapse" aria-expanded="false" aria-controls="detail2">
-                            English A2
-                        </a>
-                    </div>
-                    <div class="col-sm-12 flex-md-last collapse" id="detail2">
-                        <div class="card card-body">
-                            <p>
-                                Arts
-                            </p>
-                            <p>
-                                Food
-                            </p>
-                            <p>
-                                Directions
-                            </p>
-                        </div>
-                    </div>
-                </div>
+            {% endfor %}
             </div>
             
             

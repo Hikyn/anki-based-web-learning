@@ -15,9 +15,15 @@ db = SQL("sqlite:///app.db")
 
 @app.route("/")
 def index():
-    EnglishA1 = db.execute("SELECT * FROM EnglishA1 ORDER BY category ASC")
+    userTables = db.execute("SELECT DISTINCT main_table FROM userTables WHERE user_id = 522 ORDER BY main_table ASC")
+    print(userTables[0]["main_table"])
+    categories = []
+    for table in userTables:
+        print(table["main_table"])
+        categories += db.execute("SELECT category, main_table FROM userTables WHERE user_id = 522 AND main_table = ?", table["main_table"])
+    print(categories)
     print("User visited index page")
-    return render_template("index.html", EnglishA1=EnglishA1)
+    return render_template("index.html", userTables=userTables, categories=categories)
 
 # @app.route("/add")
 # def add():

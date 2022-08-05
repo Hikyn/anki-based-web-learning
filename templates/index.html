@@ -24,16 +24,11 @@
                     </div>
                     <div class="col-sm-12 flex-md-last collapse" id="detail1">
                         <div class="card card-body">
+                            {% for category in EnglishA1 %}
                             <p>
-                                Animals
+                                {{ category["category"] }}
                             </p>
-                            <p>
-                                Clothes
-                            </p>
-                            <p>
-                                House
-                            </p>
-
+                            {% endfor %}
                         </div>
                     </div>
                 </div>

@@ -1,0 +1,50 @@
+{% extends "layout.html" %}
+
+{% block body %}
+
+    <div class="container-fluid marginTop">
+        <div class="row bg-light">
+            <div class="col-sm-2 header-1">
+                Topics
+            </div>
+            <div class="col-sm-8 header-1">
+                Overview
+            </div>
+            <div class="col-sm-2 header-1">
+                Word list
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-2 header-1">
+                <div class="card card-block">
+                    <a class="btn btn-primary" href="#detail1" role="button" data-bs-toggle="collapse" aria-expanded="false" aria-controls="detail1">
+                        Link with href
+                      </a>
+                </div>
+                <div class="col-sm-12 flex-md-last collapse" id="detail1">
+                    <div class="card card-body">
+                      Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident.
+                    </div>
+                  </div>
+            </div>
+            
+            <div class="col-sm-8 header-1">
+            
+            </div>
+            <div class="col-sm-2 header-1">
+                <div class="card card-block">
+                    <a class="btn btn-primary" href="#detail2" role="button" data-bs-toggle="collapse" aria-expanded="false" aria-controls="detail2">
+                        Link 2
+                      </a>
+                </div>
+                <div class="col-sm-12 flex-md-last collapse" id="detail2">
+                    <div class="card card-body">
+                      Sunt sapiente ea proident.
+                    </div>
+                  </div>
+            </div>
+        </div>
+    </div>
+    <p>
+
+{% endblock %}

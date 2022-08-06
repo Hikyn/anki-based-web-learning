@@ -13,6 +13,8 @@ app.config["TEMPLATES_AUTO_RELOAD"] = True
 # Configure CS50 Library to use SQLite database
 db = SQL("sqlite:///app.db")
 
+
+# Function to add Tables or Categories to SQL
 def addTableToSQL(table, category):
     if len(db.execute("SELECT main_table FROM userTables WHERE user_id = 522 AND main_table = ?", table)) == 0:
         print("Dictionary is empty. Creating new table")
@@ -25,22 +27,53 @@ def addTableToSQL(table, category):
         else:
             print("Such category already exists")
 
-@app.route("/")
-def index():
-    userTables = db.execute("SELECT DISTINCT main_table FROM userTables WHERE user_id = 522 ORDER BY main_table ASC")
+
+# Function to read all tables belonging to user's id
+def readTables(id):
+    userTables = db.execute("SELECT DISTINCT main_table FROM userTables WHERE user_id = ? ORDER BY main_table ASC", id)
     print(userTables[0]["main_table"])
+    return userTables
+
+
+# Function to read categories from passed tables belonging to user's id
+def readCategories(userTables, id):
     categories = []
     for table in userTables:
         print(table["main_table"])
-        categories += db.execute("SELECT category, main_table FROM userTables WHERE user_id = 522 AND main_table = ?", table["main_table"])
+        categories += db.execute("SELECT category, main_table FROM userTables WHERE user_id = ? AND main_table = ?", id, table["main_table"])
     print(categories)
+    return categories
+
+
+@app.route("/")
+def index():
+
+    # Function to return userTables and categories
+    user_id = 522
+    # Read tables belonging to id 522
+    userTables = readTables(user_id)
+
+    # Read categories from passed tables belonging to id 522
+    categories = readCategories(userTables, user_id)
+    
     print("User visited index page")
     return render_template("index.html", userTables=userTables, categories=categories)
 
+
 @app.route("/manage", methods=["GET", "POST"])
 def manage():
+
+    # Function to return userTables and categories
+    user_id = 522
+    # Read tables belonging to id 522
+    userTables = readTables(user_id)
+
+    # Read categories from passed tables belonging to id 522
+    categories = readCategories(userTables, user_id)
+
     print("User visited manage page")
-    return render_template("manage.html")
+    return render_template("manage.html", userTables=userTables, categories=categories)
+
 
 @app.route("/add", methods=["GET", "POST"])
 def add():
@@ -53,6 +86,7 @@ def add():
         addTableToSQL(table, category)
 
     return redirect("add.html")
+
 
 @app.route("/delete", methods=["GET", "POST"])
 def delete():

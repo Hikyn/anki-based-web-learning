@@ -21,7 +21,7 @@
                 </div>
                 <div class="col-sm-12 flex-md-last collapse" id="create1">
                     <div class="card card-body">
-                        <form action="/add" method="post">
+                        <form action="/addTable" method="post">
                             <div class="mb-6">
                                 <input autocomplete="off" class="form-control col-sm-6" id="table" name="table" placeholder="Table to add" type="text">
                             </div>
@@ -42,7 +42,7 @@
                 </div>
                 <div class="col-sm-12 flex-md-last collapse" id="delete1">
                     <div class="card card-body">
-                        <form action="/delete" method="post">
+                        <form action="/deleteTable" method="post">
                             <select class="form-control col-sm-6" name="table" id="table">
                                 {% for table in userTables %}
                                 <option value="{{ table["main_table"] }}">{{ table["main_table"] }}</option>
@@ -67,7 +67,7 @@
                 </div>
                 <div class="col-sm-12 flex-md-last collapse" id="create2">
                     <div class="card card-body">
-                        <form action="/add" method="post">
+                        <form action="/addCategory" method="post">
                             <div class="createSpace"></div>
                             <select class="form-control col-sm-12" name="table" id="table">
                                 {% for table in userTables %}
@@ -76,7 +76,7 @@
                             </select>
                             <div class="createSpace"></div>
                             <div class="mb-6">
-                                <input autocomplete="off" class="form-control col-sm-6" id="table" name="table" placeholder="Category to add" type="text">
+                                <input autocomplete="off" class="form-control col-sm-6" id="category" name="category" placeholder="Category to add" type="text">
                             </div>
                             <div class="createSpace"></div>
                             <div class="mb-3 btn-center">
@@ -106,12 +106,12 @@
                                 </a>
                             </div>
                             <div class="col-sm-12 flex-md-last collapse" id="table{{ table["main_table"] }}">
-                                <form action="/delete" method="post">
+                                <form action="/deleteCategory" method="post">
                                     <div class="createSpace"></div>
-                                    <select class="form-control col-sm-12" name="table" id="table">
+                                    <select class="form-control col-sm-12" name="request" id="request">
                                         {% for unit in categories %}
                                         {% if table["main_table"] in unit["main_table"] %}
-                                        <option value="{{ table["main_table"] }}">{{ unit["category"] }}</option>
+                                        <option name="category" value="{{ table["main_table"] }}-{{ unit["category"] }}">{{ unit["category"] }}</option>
                                         {% endif %}
                                         {% endfor %}
                                     </select>

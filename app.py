@@ -1,5 +1,5 @@
 from cs50 import SQL
-from flask import Flask, url_for, render_template, request, session
+from flask import Flask, url_for, render_template, request, session, redirect
 
 # Flask will use directory of app.py to search for templates and static
 app = Flask(__name__)
@@ -37,6 +37,11 @@ def index():
     print("User visited index page")
     return render_template("index.html", userTables=userTables, categories=categories)
 
+@app.route("/manage", methods=["GET", "POST"])
+def manage():
+    print("User visited manage page")
+    return render_template("manage.html")
+
 @app.route("/add", methods=["GET", "POST"])
 def add():
     print("User visited add page")
@@ -46,9 +51,20 @@ def add():
 
         # Create a function that does everything below so it will take less space
         addTableToSQL(table, category)
+
+    return redirect("add.html")
+
+@app.route("/delete", methods=["GET", "POST"])
+def delete():
+    print("User visited delete page")
+    if request.method == "POST":
+        table = request.form.get("table")
+        category = request.form.get("category")
+
+        # Create a function that does everything below so it will take less space
+        # deleteTableFromSQL(table, category)
                 
-        return render_template("add.html")
-    return render_template("add.html")
+        return redirect("manage.html")
 
 
 # Tests for urls at the start of flask server

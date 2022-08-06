@@ -74,12 +74,17 @@ def dCategoryFromTable(table, category, id):
     db.execute("DELETE FROM userTables WHERE main_table = ? AND category = ? AND user_id = ?", table, category, id)
     return
 
+def dWordFromCategory(table, category, word, id):
+    db.execute("DELETE FROM userTables WHERE main_table = ? AND category = ? AND words = ? AND user_id = ?", table, category, word, id)
+    return
+
 
 # Function to read all tables belonging to user's id
 def readTables(id):
     userTables = db.execute("SELECT DISTINCT main_table FROM userTables WHERE user_id = ? ORDER BY main_table ASC", id)
     # print(userTables[0]["main_table"])
     return userTables
+    
 
 
 # Function to read categories from passed tables belonging to user's id
@@ -206,6 +211,22 @@ def deleteCategory():
         category = strToSplit[1]
         print(f"Trying to delete from table {table} category {category}")
         dCategoryFromTable(table, category, id)
+
+        return redirect("/manage")
+
+@app.route("/deleteWord", methods=["POST"])
+def deleteWord():
+    print("User visited delete Word page")
+    if request.method == "POST":
+        id = 522
+        strToSplit = request.form.get("request")
+        word = request.form.get("word")
+        print(strToSplit.split("-"))
+        strToSplit = strToSplit.split("-")
+        table = strToSplit[0]
+        category = strToSplit[1]
+        print(f"Trying to delete from table {table} category {category} WORD {word}")
+        dWordFromCategory(table, category, word, id)
 
         return redirect("/manage")
 

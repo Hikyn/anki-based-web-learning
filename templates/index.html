@@ -6,56 +6,44 @@
         <div class="row bg-light">
             <div class="col-sm-2 header-1">
                 Topics
+                <div class="row centered noMargin">
+                    {% for table in userTables %}
+                    <div class="row">
+                        <div class="col-sm-12 header-1">
+                            <div class="card card-block centered">
+                                <a class="btn btn-secondary" href="#table{{ table["main_table"] }}" role="button" data-bs-toggle="collapse" aria-expanded="false" aria-controls="table{{ table["main_table"] }}">
+                                    {{ table["main_table"] }}
+                                </a>
+                            </div>
+                            <div class="col-sm-12 flex-md-last collapse" id="table{{ table["main_table"] }}">
+                                <div class="card card-body">
+                                    {% for unit in categories %}
+                                    {% if table["main_table"] in unit["main_table"] %}
+                                    <form action="/" method="post">
+                                        <button name="request" class="category" value="{{ unit["main_table"] }}-{{ unit["category"] }}">{{ unit["category"] }}</button>
+                                    </form>
+        
+                                    {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
             </div>
             <div class="col-sm-8 header-1">
                 Overview
             </div>
             <div class="col-sm-2 header-1">
                 Word list
-            </div>
-        </div>
-        <div class="row">
-            {% for table in userTables %}
-            <div class="row">
-                <div class="col-sm-2 header-1">
-                    <div class="card card-block">
-                        <a class="btn btn-secondary" href="#table{{ table["main_table"] }}" role="button" data-bs-toggle="collapse" aria-expanded="false" aria-controls="table{{ table["main_table"] }}">
-                            {{ table["main_table"] }}
-                        </a>
-                    </div>
-                    <div class="col-sm-12 flex-md-last collapse" id="table{{ table["main_table"] }}">
-                        <div class="card card-body">
-                            {% for unit in categories %}
-                            {% if table["main_table"] in unit["main_table"] %}
-                            <form action="/" method="post">
-                                <button name="request" class="category" value="{{ unit["main_table"] }}-{{ unit["category"] }}">{{ unit["category"] }}</button>
-                            </form>
-
-                            {% endif %}
-                            {% endfor %}
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-            <div class="col-sm-8 header-1">
-                {% for word in words %}
-                <p>{{ word["words"] }}</p>
-                {% endfor %}
-            </div>
-            <div class="col-sm-2 header-1">
-                <div class="row">
-                    <div class="col-sm-2 header-1">
-                        <div class="col-sm-12 flex-md-last collapse">
-                            <div class="card card-body">
-                                
-                            </div>
-                        </div>
-                    </div>
+                <div class="col-sm-8 header-1 centered">
+                    {% for word in words %}
+                    <p>{{ word["words"] }}</p>
+                    {% endfor %}
                 </div>
             </div>
         </div>
     </div>
-    <p>
 
 {% endblock %}

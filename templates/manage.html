@@ -180,11 +180,11 @@
             </div>
             <div class="col-sm-6 header-1">
                 <div class="card card-block">
-                    <a class="btn btn-outline-secondary" href="#delete2" role="button" data-bs-toggle="collapse" aria-expanded="false" aria-controls="delete2">
-                        Delete category in table
+                    <a class="btn btn-outline-secondary" href="#delete3" role="button" data-bs-toggle="collapse" aria-expanded="false" aria-controls="delete3">
+                        Delete word in category
                     </a>
                 </div>
-                <div class="col-sm-12 flex-md-last collapse" id="delete2">
+                <div class="col-sm-12 flex-md-last collapse" id="delete3">
                     {% for table in userTables %}
                     <div class="row header-2">
                         <div class="col-sm-3">
@@ -197,7 +197,7 @@
                                 </a>
                             </div>
                             <div class="col-sm-12 flex-md-last collapse" id="table{{ table["main_table"] }}">
-                                <form action="/deleteCategory" method="post">
+                                <form action="/deleteWord" method="post">
                                     <div class="createSpace"></div>
                                     <select class="form-control col-sm-12" name="request" id="request">
                                         {% for unit in categories %}
@@ -207,6 +207,9 @@
                                         {% endfor %}
                                     </select>
                                     <div class="createSpace"></div>
+                                    <div class="mb-6">
+                                        <input autocomplete="off" class="form-control col-sm-6" id="word" name="word" placeholder="Word to delete" type="text">
+                                    </div>
                                     <div class="mb-3 btn-center">
                                         <button class="btn btn-danger" type="submit">Delete</button>
                                     </div>

@@ -6,11 +6,25 @@
     height:5px;
 }
 
-.row {
+.row>* {
     color:black;
-
+    padding-right: 0px;
 }
 
+.noMargin {
+    margin-left: 0px !important;
+    margin-right: 0px !important;
+}
+
+.noPadding {
+    padding-right: 0px !important;
+    padding-left: 0px !important;
+}
+.centered {
+    text-align: center;
+    margin: auto;
+
+}
 .header-1 {
     font-size: large;
     font-family: verdana;

@@ -27,9 +27,10 @@
                         <div class="card card-body">
                             {% for unit in categories %}
                             {% if table["main_table"] in unit["main_table"] %}
-                            <p>
-                                {{ unit["category"] }}
-                            </p>
+                            <form action="/" method="post">
+                                <button name="request" class="category" value="{{ unit["main_table"] }}-{{ unit["category"] }}">{{ unit["category"] }}</button>
+                            </form>
+
                             {% endif %}
                             {% endfor %}
                         </div>
@@ -37,14 +38,21 @@
                 </div>
             </div>
             {% endfor %}
-            </div>
-            
-            
             <div class="col-sm-8 header-1">
-            
+                {% for word in words %}
+                <p>{{ word["words"] }}</p>
+                {% endfor %}
             </div>
             <div class="col-sm-2 header-1">
-
+                <div class="row">
+                    <div class="col-sm-2 header-1">
+                        <div class="col-sm-12 flex-md-last collapse">
+                            <div class="card card-body">
+                                
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

@@ -15,118 +15,122 @@ app.config["TEMPLATES_AUTO_RELOAD"] = True
 db = SQL("sqlite:///app.db")
 
 # Check if there are any tables with that name and user_id
-def tableExists(table, id):
-    if len(db.execute("SELECT main_table FROM userTables WHERE user_id = 522 AND main_table = ?", table)) == 0:
+def tableExists(table):
+    if len(db.execute("SELECT main_table FROM userTables WHERE user_id = ? AND main_table = ?", session["id"], table)) == 0:
         return 0
     else:
         return 1
 
 
-def categoryExists(category, id):
-    if len(db.execute("SELECT main_table FROM userTables WHERE user_id = 522 AND category = ?", category)) == 0:
+def categoryExists(table, category):
+    if len(db.execute("SELECT main_table FROM userTables WHERE user_id = ? AND main_table = ? AND category = ?", session["id"], table, category)) == 0:
         return 0
     else:
         return 1
 
 
-def wordExists(word, id):
-    if len(db.execute("SELECT main_table FROM userTables WHERE user_id = 522 AND words = ?", word)) == 0:
+def wordExists(category, word):
+    if len(db.execute("SELECT main_table FROM userTables WHERE user_id = ? AND category = ? AND words = ?", session["id"], category, word)) == 0:
         return 0
     else:
         return 1
 
 
-def aTableToSQL(table, id):
-    if tableExists(table, id) == 0:
+def aTableToSQL(table):
+    if tableExists(table) == 0:
         print("Dictionary is empty. Creating new table")
-        db.execute("INSERT INTO userTables (user_id, main_table) VALUES (?, ?)", id, table)
+        db.execute("INSERT INTO userTables (user_id, main_table) VALUES (?, ?)", session["id"], table)
     else:
         print("Dictionary exists")
 
 
-def aCategoryToTable(table, category, id):
+def aCategoryToTable(table, category):
     # Delete Null category
-    db.execute("DELETE FROM userTables WHERE main_table = ? AND user_id = ? AND category IS NULL", table, id)
+    db.execute("DELETE FROM userTables WHERE main_table = ? AND user_id = ? AND category IS NULL", table, session["id"])
 
-    if categoryExists(category, id) == 0:
+    if categoryExists(table, category, id) == 0:
         print(f"Adding category {category} to table")
-        db.execute("INSERT INTO userTables (user_id, main_table, category) VALUES (?, ?, ?)", id, table, category)
+        db.execute("INSERT INTO userTables (user_id, main_table, category) VALUES (?, ?, ?)", session["id"], table, category)
     else:
         print("Such category already exists")
 
 
-def aWordToCategory(table, category, word, id):
+def aWordToCategory(table, category, word):
     # Delete Null words
-    db.execute("DELETE FROM userTables WHERE main_table = ? AND user_id = ? AND category = ? AND words IS NULL", table, id, category)
-    if wordExists(word, id) == 0:
+    db.execute("DELETE FROM userTables WHERE main_table = ? AND user_id = ? AND category = ? AND words IS NULL", table, session["id"], category)
+    if wordExists(category, word) == 0:
         print(f"Adding word {word} to table")
-        db.execute("INSERT INTO userTables (user_id, main_table, category, words) VALUES (?, ?, ?, ?)", id, table, category, word)
+        db.execute("INSERT INTO userTables (user_id, main_table, category, words) VALUES (?, ?, ?, ?)", session["id"], table, category, word)
     else:
         print("Such word already exists")
 
 
-def dTableFromSQL(table, id):
-    db.execute("DELETE FROM userTables WHERE main_table = ? AND user_id = ?", table, id)
+def dTableFromSQL(table):
+    db.execute("DELETE FROM userTables WHERE main_table = ? AND user_id = ?", table, session["id"])
     return
 
 
-def dCategoryFromTable(table, category, id):
-    db.execute("DELETE FROM userTables WHERE main_table = ? AND category = ? AND user_id = ?", table, category, id)
+def dCategoryFromTable(table, category):
+    db.execute("DELETE FROM userTables WHERE main_table = ? AND category = ? AND user_id = ?", table, category, session["id"])
     return
 
-def dWordFromCategory(table, category, word, id):
-    db.execute("DELETE FROM userTables WHERE main_table = ? AND category = ? AND words = ? AND user_id = ?", table, category, word, id)
+def dWordFromCategory(table, category, word):
+    db.execute("DELETE FROM userTables WHERE main_table = ? AND category = ? AND words = ? AND user_id = ?", table, category, word, session["id"])
     return
 
 
 # Function to read all tables belonging to user's id
-def readTables(id):
-    userTables = db.execute("SELECT DISTINCT main_table FROM userTables WHERE user_id = ? ORDER BY main_table ASC", id)
+def readTables():
+    userTables = db.execute("SELECT DISTINCT main_table FROM userTables WHERE user_id = ? ORDER BY main_table ASC", session["id"])
     # print(userTables[0]["main_table"])
     return userTables
     
 
 
 # Function to read categories from passed tables belonging to user's id
-def readCategories(userTables, id):
+def readCategories(userTables):
     categories = []
     for table in userTables:
         print(table["main_table"])
-        categories += db.execute("SELECT DISTINCT category, main_table FROM userTables WHERE user_id = ? AND main_table = ? ORDER BY category ASC", id, table["main_table"])
+        categories += db.execute("SELECT DISTINCT category, main_table FROM userTables WHERE user_id = ? AND main_table = ? ORDER BY category ASC", session["id"], table["main_table"])
     print(categories)
     return categories
 
-def readWords(table, category, id):
+def readWords(table, category):
     words = []
-    words = db.execute("SELECT DISTINCT words FROM userTables WHERE user_id = ? AND main_table = ? AND category = ? ORDER BY main_table ASC", id, table, category)
+    words = db.execute("SELECT DISTINCT words FROM userTables WHERE user_id = ? AND main_table = ? AND category = ? ORDER BY main_table ASC", session["id"], table, category)
     print(words)
     return words
 
 
 @app.route("/", methods=["GET", "POST"])
 def index():
-    # Testing sessions
-    session["testing"] = "This is the value of session['testing']"
-
-    # Temporarily store id of 522 in cookie
+    # Handling cookies
     session["id"] = 522
     session["login"] = "Hikyn"
-
 
     # Look inside of a cookie
     print(session)
     print(session["testing"])
 
-    # Read tables belonging to id 522
-    userTables = readTables(session["id"])
+    # Read tables belonging to session ID
+    userTables = readTables()
     if len(userTables) == 0:
         return render_template("index.html")
 
-    # Read categories from passed tables belonging to id 522
-    categories = readCategories(userTables, session["id"])
+    # Read categories from passed tables belonging to session ID
+    categories = readCategories(userTables)
     
     if request.method == "GET":
-        print("User visited index page")
+        # If session remembers your last visited tables and categories, it will display them
+        try:
+            if session["currentTable"] != "" and session["currentCategory"] != "":
+                words = readWords(session["currentTable"], session["currentCategory"])
+                return render_template("index.html", userTables=userTables, currentTable=session["currentTable"], categories=categories, currentCategory=session["currentCategory"], words=words)
+        except KeyError:
+            print("There are no last tables/categories/words in cookie")
+
+        print("Default page with no selected tables")
         return render_template("index.html", userTables=userTables, categories=categories)
 
     if request.method == "POST":
@@ -138,22 +142,24 @@ def index():
         currentCategory = category
         print(currentTable)
         print(currentCategory)
-        words = readWords(table, category, session["id"])
+        words = readWords(table, category)
         if len(words) == 0:
             return render_template("index.html", userTables=userTables, categories=categories)
-        #print("User visited manage page VIA POST")
+        # If category is not empty, it will render everything and store last table/category/words in cookie
+        session["currentTable"] = currentTable
+        session["currentCategory"] = currentCategory
         return render_template("index.html", userTables=userTables, currentTable=currentTable, categories=categories, currentCategory=currentCategory, words=words)
 
 
 @app.route("/manage", methods=["GET", "POST"])
 def manage():
     # Function to return userTables and categories
-    userTables = readTables(session["id"])
+    userTables = readTables()
     if len(userTables) == 0:
         return render_template("manage.html")
 
-    # Read categories from passed tables belonging to id 522
-    categories = readCategories(userTables, session["id"])
+    # Read categories from passed tables belonging to session["id"]
+    categories = readCategories(userTables)
     if len(categories) == 0:
         return render_template("manage.html", userTables=userTables)
 
@@ -167,7 +173,7 @@ def addTable():
     if request.method == "POST":
         table = request.form.get("table")
         print(f"Trying to add table {table}")
-        aTableToSQL(table, id)
+        aTableToSQL(table)
 
     return redirect("/manage")
 
@@ -177,7 +183,7 @@ def addCategory():
         table = request.form.get("table")
         category = request.form.get("category")
         print(f"Trying to add category {category}")
-        aCategoryToTable(table, category, id)
+        aCategoryToTable(table, category)
 
     return redirect("/manage")
 
@@ -192,7 +198,7 @@ def addWord():
         table = strToSplit[0]
         category = strToSplit[1]
         print(f"Trying to add to table {table} category {category} WORD {word}")
-        aWordToCategory(table, category, word, id)
+        aWordToCategory(table, category, word)
 
         return redirect("/manage")
 
@@ -204,7 +210,7 @@ def addWordOverview():
         table = request.form.get("table")
         category = request.form.get("category")
         print(f"Trying to add to table {table} category {category} WORD {word}")
-        aWordToCategory(table, category, word, id)
+        aWordToCategory(table, category, word)
 
         return redirect("/")
 
@@ -215,7 +221,7 @@ def deleteTable():
     if request.method == "POST":
         table = request.form.get("table")
         print(f"Trying to delete table {table}")
-        dTableFromSQL(table, id)
+        dTableFromSQL(table)
 
         return redirect("/manage")
 
@@ -229,7 +235,7 @@ def deleteCategory():
         table = strToSplit[0]
         category = strToSplit[1]
         print(f"Trying to delete from table {table} category {category}")
-        dCategoryFromTable(table, category, id)
+        dCategoryFromTable(table, category)
 
         return redirect("/manage")
 
@@ -244,7 +250,7 @@ def deleteWord():
         table = strToSplit[0]
         category = strToSplit[1]
         print(f"Trying to delete from table {table} category {category} WORD {word}")
-        dWordFromCategory(table, category, word, id)
+        dWordFromCategory(table, category, word)
 
         return redirect("/manage")
 
@@ -255,7 +261,7 @@ def deleteWordOverview():
         table = request.form.get("table")
         category = request.form.get("category")
         print(f"Trying to delete from table {table} category {category} WORD {word}")
-        dWordFromCategory(table, category, word, id)
+        dWordFromCategory(table, category, word)
 
         return redirect("/")
 

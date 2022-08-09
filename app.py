@@ -1,5 +1,6 @@
 from cs50 import SQL
 from flask import Flask, url_for, render_template, request, session, redirect
+from flask_session import Session
 
 # Flask will use directory of app.py to search for templates and static
 app = Flask(__name__)
@@ -12,7 +13,6 @@ app.config["TEMPLATES_AUTO_RELOAD"] = True
 
 # Configure CS50 Library to use SQLite database
 db = SQL("sqlite:///app.db")
-
 
 # Check if there are any tables with that name and user_id
 def tableExists(table, id):
@@ -105,15 +105,25 @@ def readWords(table, category, id):
 
 @app.route("/", methods=["GET", "POST"])
 def index():
-    # Function to return userTables and categories
-    user_id = 522
+    # Testing sessions
+    session["testing"] = "This is the value of session['testing']"
+
+    # Temporarily store id of 522 in cookie
+    session["id"] = 522
+    session["login"] = "Hikyn"
+
+
+    # Look inside of a cookie
+    print(session)
+    print(session["testing"])
+
     # Read tables belonging to id 522
-    userTables = readTables(user_id)
+    userTables = readTables(session["id"])
     if len(userTables) == 0:
         return render_template("index.html")
 
     # Read categories from passed tables belonging to id 522
-    categories = readCategories(userTables, user_id)
+    categories = readCategories(userTables, session["id"])
     
     if request.method == "GET":
         print("User visited index page")
@@ -124,24 +134,26 @@ def index():
         strToSplit = strToSplit.split("-")
         table = strToSplit[0]
         category = strToSplit[1]
-        print(table)
-        print(category)
-        words = readWords(table, category, user_id)
+        currentTable = table
+        currentCategory = category
+        print(currentTable)
+        print(currentCategory)
+        words = readWords(table, category, session["id"])
+        if len(words) == 0:
+            return render_template("index.html", userTables=userTables, categories=categories)
         #print("User visited manage page VIA POST")
-        return render_template("index.html", userTables=userTables, categories=categories, words=words)
+        return render_template("index.html", userTables=userTables, currentTable=currentTable, categories=categories, currentCategory=currentCategory, words=words)
 
 
 @app.route("/manage", methods=["GET", "POST"])
 def manage():
     # Function to return userTables and categories
-    user_id = 522
-    # Read tables belonging to id 522
-    userTables = readTables(user_id)
+    userTables = readTables(session["id"])
     if len(userTables) == 0:
         return render_template("manage.html")
 
     # Read categories from passed tables belonging to id 522
-    categories = readCategories(userTables, user_id)
+    categories = readCategories(userTables, session["id"])
     if len(categories) == 0:
         return render_template("manage.html", userTables=userTables)
 
@@ -153,7 +165,6 @@ def manage():
 @app.route("/addTable", methods=["POST"])
 def addTable():
     if request.method == "POST":
-        id = 522
         table = request.form.get("table")
         print(f"Trying to add table {table}")
         aTableToSQL(table, id)
@@ -163,7 +174,6 @@ def addTable():
 @app.route("/addCategory", methods=["POST"])
 def addCategory():
     if request.method == "POST":
-        id = 522
         table = request.form.get("table")
         category = request.form.get("category")
         print(f"Trying to add category {category}")
@@ -175,7 +185,6 @@ def addCategory():
 def addWord():
     print("User visited add Word page")
     if request.method == "POST":
-        id = 522
         strToSplit = request.form.get("request")
         word = request.form.get("word")
         print(strToSplit.split("-"))
@@ -187,12 +196,23 @@ def addWord():
 
         return redirect("/manage")
 
+@app.route("/addWordOverview", methods=["POST"])
+def addWordOverview():
+    print("User visited add Word page")
+    if request.method == "POST":
+        word = request.form.get("wordAdd")
+        table = request.form.get("table")
+        category = request.form.get("category")
+        print(f"Trying to add to table {table} category {category} WORD {word}")
+        aWordToCategory(table, category, word, id)
+
+        return redirect("/")
+
 
 @app.route("/deleteTable", methods=["POST"])
 def deleteTable():
     print("User visited delete Table page")
     if request.method == "POST":
-        id = 522
         table = request.form.get("table")
         print(f"Trying to delete table {table}")
         dTableFromSQL(table, id)
@@ -203,7 +223,6 @@ def deleteTable():
 def deleteCategory():
     print("User visited delete Category page")
     if request.method == "POST":
-        id = 522
         strToSplit = request.form.get("request")
         print(strToSplit.split("-"))
         strToSplit = strToSplit.split("-")
@@ -218,7 +237,6 @@ def deleteCategory():
 def deleteWord():
     print("User visited delete Word page")
     if request.method == "POST":
-        id = 522
         strToSplit = request.form.get("request")
         word = request.form.get("word")
         print(strToSplit.split("-"))
@@ -229,6 +247,17 @@ def deleteWord():
         dWordFromCategory(table, category, word, id)
 
         return redirect("/manage")
+
+@app.route("/deleteWordOverview", methods=["POST"])
+def deleteWordOverview():
+    if request.method == "POST":
+        word = request.form.get("wordDel")
+        table = request.form.get("table")
+        category = request.form.get("category")
+        print(f"Trying to delete from table {table} category {category} WORD {word}")
+        dWordFromCategory(table, category, word, id)
+
+        return redirect("/")
 
 # Tests for urls at the start of flask server
 # with app.test_request_context():

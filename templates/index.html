@@ -42,6 +42,29 @@
                     <p>{{ word["words"] }}</p>
                     {% endfor %}
                 </div>
+                {% if currentTable != NUN %}
+                <form class="col-sm-8 centered" action="/addWordOverview" method="post">
+                    <div class="mb-6">
+                        <input autocomplete="off" class="form-control col-sm-6" id="wordAdd" name="wordAdd" placeholder="Word to add" type="text">
+                        <input autocomplete="off" class="form-control col-sm-6" id="table" name="table" value="{{ currentTable }}" type="hidden">
+                        <input autocomplete="off" class="form-control col-sm-6" id="category" name="category" value="{{ currentCategory }}" type="hidden">
+                    </div>
+                    <div class="mb-3 btn-center">
+                        <button class="btn btn-success" type="submit">Add</button>
+                    </div>
+                    <div class="createSpace"></div>
+                </form>
+                <form class="col-sm-8 centered" action="/deleteWordOverview" method="post">
+                    <div class="mb-6">
+                        <input autocomplete="off" class="form-control col-sm-6" id="wordDel" name="wordDel" placeholder="Word to delete" type="text">
+                        <input autocomplete="off" class="form-control col-sm-6" id="table" name="table" value="{{ currentTable }}" type="hidden">
+                        <input autocomplete="off" class="form-control col-sm-6" id="category" name="category" value="{{ currentCategory }}" type="hidden">
+                    </div>
+                    <div class="mb-3 btn-center">
+                        <button class="btn btn-warning" type="submit">Delete</button>
+                    </div>
+                </form>
+                {% endif %}
             </div>
         </div>
     </div>

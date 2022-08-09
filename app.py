@@ -1,6 +1,7 @@
 from cs50 import SQL
 from flask import Flask, url_for, render_template, request, session, redirect
 from flask_session import Session
+from datetime import timedelta
 
 # Flask will use directory of app.py to search for templates and static
 app = Flask(__name__)
@@ -10,6 +11,7 @@ app.secret_key = "af3c081ff9e7c80f132f848ea44f0a1fd89cf5388a517edbe268dcb3d9f57c
 
 # Ensure templates are auto-reloaded
 app.config["TEMPLATES_AUTO_RELOAD"] = True
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=28)
 
 # Configure CS50 Library to use SQLite database
 db = SQL("sqlite:///app.db")

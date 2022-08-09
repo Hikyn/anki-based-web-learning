@@ -15,14 +15,25 @@
                                     {{ table["main_table"] }}
                                 </a>
                             </div>
+                            {% if currentTable == table["main_table"] %}
+                            <div class="col-sm-12 flex-md-last collapse show" id="table{{ table["main_table"] }}">
+                            {% else %}
                             <div class="col-sm-12 flex-md-last collapse" id="table{{ table["main_table"] }}">
+                            {% endif %}
                                 <div class="card card-body">
                                     {% for unit in categories %}
                                     {% if table["main_table"] in unit["main_table"] %}
+
+                                    {% if currentCategory == unit["category"] %}
+                                    <form action="/" method="post">
+                                        <button name="request" class="category category-active" value="{{ unit["main_table"] }}-{{ unit["category"] }}">{{ unit["category"] }}</button>
+                                    </form>
+                                    {% else %}
                                     <form action="/" method="post">
                                         <button name="request" class="category" value="{{ unit["main_table"] }}-{{ unit["category"] }}">{{ unit["category"] }}</button>
                                     </form>
-        
+                                    {% endif %}
+
                                     {% endif %}
                                     {% endfor %}
                                 </div>
@@ -36,7 +47,11 @@
                 Overview
             </div>
             <div class="col-sm-2 header-1">
+                {% if currentCategory != "" %}
+                {{ currentCategory }}:
+                {% else %}
                 Word list
+                {% endif %}
                 <div class="col-sm-8 header-1 centered">
                     {% for word in words %}
                     <p>{{ word["words"] }}</p>

@@ -57,3 +57,7 @@
 .category:hover {
     background-color: lightgray;
 }
+
+.category-active {
+    background-color: lightgray;
+}

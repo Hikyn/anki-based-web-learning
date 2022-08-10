@@ -38,7 +38,7 @@ def wordExists(category, word):
         return 1
 
 
-def aTableToSQL(table):
+def tableToSQL(table):
     if tableExists(table) == 0:
         print("Dictionary is empty. Creating new table")
         db.execute("INSERT INTO userTables (user_id, main_table) VALUES (?, ?)", session["id"], table)
@@ -46,7 +46,7 @@ def aTableToSQL(table):
         print("Dictionary exists")
 
 
-def aCategoryToTable(table, category):
+def categoryToTable(table, category):
     # Delete Null category
     db.execute("DELETE FROM userTables WHERE main_table = ? AND user_id = ? AND category IS NULL", table, session["id"])
 
@@ -57,7 +57,7 @@ def aCategoryToTable(table, category):
         print("Such category already exists")
 
 
-def aWordToCategory(table, category, word):
+def wordToCategory(table, category, word):
     # Delete Null words
     db.execute("DELETE FROM userTables WHERE main_table = ? AND user_id = ? AND category = ? AND words IS NULL", table, session["id"], category)
     if wordExists(category, word) == 0:
@@ -67,16 +67,16 @@ def aWordToCategory(table, category, word):
         print("Such word already exists")
 
 
-def dTableFromSQL(table):
+def tableFromSQL(table):
     db.execute("DELETE FROM userTables WHERE main_table = ? AND user_id = ?", table, session["id"])
     return
 
 
-def dCategoryFromTable(table, category):
+def categoryFromTable(table, category):
     db.execute("DELETE FROM userTables WHERE main_table = ? AND category = ? AND user_id = ?", table, category, session["id"])
     return
 
-def dWordFromCategory(table, category, word):
+def wordFromCategory(table, category, word):
     db.execute("DELETE FROM userTables WHERE main_table = ? AND category = ? AND words = ? AND user_id = ?", table, category, word, session["id"])
     return
 
@@ -126,13 +126,19 @@ def index():
         # If session remembers your last visited tables and categories, it will display them
         try:
             if session["currentTable"] != "" and session["currentCategory"] != "":
+                print("Table and Category are selected")
                 words = readWords(session["currentTable"], session["currentCategory"])
 
-                #If cookies says that we are in editing mode, then pass that cookie into render.
+            if session.get("editTables") == 1:
+                print("EDIT table pressed")
+                return render_template("index.html", userTables=userTables, currentTable=session["currentTable"], categories=categories, currentCategory=session["currentCategory"], editTables=session["editTables"])
+            else:
+                words = ""
                 if session.get("editCategories") == 1:
-                    return render_template("index.html", userTables=userTables, currentTable=session["currentTable"], categories=categories, currentCategory=session["currentCategory"], words=words, editing=session["editCategories"])
-                
+                    print("Edit categories is pressed")
+                    return render_template("index.html", userTables=userTables, currentTable=session["currentTable"], categories=categories, currentCategory=session["currentCategory"], words=words, editCategories=session["editCategories"])
                 return render_template("index.html", userTables=userTables, currentTable=session["currentTable"], categories=categories, currentCategory=session["currentCategory"], words=words)
+               
         except KeyError:
             print("There are no last tables/categories/words in cookie")
 
@@ -182,7 +188,7 @@ def addTable():
     if request.method == "POST":
         table = request.form.get("table")
         print(f"Trying to add table {table}")
-        aTableToSQL(table)
+        tableToSQL(table)
 
     return redirect("/manage")
 
@@ -192,7 +198,7 @@ def addCategory():
         table = request.form.get("table")
         category = request.form.get("category")
         print(f"Trying to add category {category}")
-        aCategoryToTable(table, category)
+        categoryToTable(table, category)
         # Return user back to manage
         return redirect("/manage")
 
@@ -207,7 +213,7 @@ def addWord():
         table = strToSplit[0]
         category = strToSplit[1]
         print(f"Trying to add to table {table} category {category} WORD {word}")
-        aWordToCategory(table, category, word)
+        wordToCategory(table, category, word)
 
         return redirect("/manage")
 
@@ -220,12 +226,12 @@ def changeWordOverview():
         word = request.form.get("word")
         if submit == "add":
             print(f"Trying to add to table {table} category {category} WORD {word}")
-            aWordToCategory(table, category, word)
+            wordToCategory(table, category, word)
             return redirect("/")
 
         elif submit == "delete":
             print(f"Trying to delete from table {table} category {category} WORD {word}")
-            dWordFromCategory(table, category, word)
+            wordFromCategory(table, category, word)
             return redirect("/")
 
         return redirect("/")
@@ -239,24 +245,61 @@ def changeCategoryOverview():
         word = request.form.get("word")
         if submit == "add":
             print(f"Trying to add category {category} to table {table}")
-            aCategoryToTable(table, category)
+            categoryToTable(table, category)
             return redirect("/")
 
         elif submit == "delete":
             print(f"Trying to delete category {category} from table {table}")
-            dCategoryFromTable(table, category)
+            categoryFromTable(table, category)
             return redirect("/")
 
-        elif submit == "edit":
+        elif submit == "editCategory":
+            session["currentTable"] = table
+            session["currentCategory"] = ""
             print("Trying to edit categories in overview")
+            session["editTables"] = 0
             session["editCategories"] = 1
         
-        elif submit == "stopEdit":
+        elif submit == "stopEditCategory":
+            session["currentTable"] = table
+            session["currentCategory"] = ""
             print("Trying to stop editing categories in overview")
+            session["editTables"] = 0
             session["editCategories"] = 0
+
+        elif submit == "editTables":
+            session["currentTable"] = ""
+            print("Trying to edit tables")
+            session["currentCategory"] = ""
+            session["editCategories"] = 0
+            session["editTables"] = 1
+
+        elif submit == "stopEditTables":
+            session["currentTable"] = ""
+            print("Trying to stop editing tables")
+            session["currentCategory"] = ""
+            session["editCategories"] = 0
+            session["editTables"] = 0
+
 
         return redirect("/")
 
+@app.route("/changeTablesOverview", methods=["POST"])
+def changeTableOverview():
+    if request.method == "POST":
+        submit = request.form.get("submit")
+        table = request.form.get("table")
+        if submit == "add":
+            print(f"Trying to add to table {table}")
+            tableToSQL(table)
+            return redirect("/")
+
+        elif submit == "delete":
+            print(f"Trying to delete from table {table}")
+            tableFromSQL(table)
+            return redirect("/")
+
+        return redirect("/")
 
 @app.route("/deleteTable", methods=["POST"])
 def deleteTable():
@@ -264,7 +307,7 @@ def deleteTable():
     if request.method == "POST":
         table = request.form.get("table")
         print(f"Trying to delete table {table}")
-        dTableFromSQL(table)
+        tableFromSQL(table)
 
         return redirect("/manage")
 
@@ -278,7 +321,7 @@ def deleteCategory():
         table = strToSplit[0]
         category = strToSplit[1]
         print(f"Trying to delete from table {table} category {category}")
-        dCategoryFromTable(table, category)
+        categoryFromTable(table, category)
         # Return user back to manage
         return redirect("/manage")
 
@@ -294,7 +337,7 @@ def deleteWord():
         table = strToSplit[0]
         category = strToSplit[1]
         print(f"Trying to delete from table {table} category {category} WORD {word}")
-        dWordFromCategory(table, category, word)
+        wordFromCategory(table, category, word)
 
         return redirect("/manage")
 

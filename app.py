@@ -113,7 +113,6 @@ def index():
 
     # Look inside of a cookie
     print(session)
-    print(session["testing"])
 
     # Read tables belonging to session ID
     userTables = readTables()
@@ -128,6 +127,11 @@ def index():
         try:
             if session["currentTable"] != "" and session["currentCategory"] != "":
                 words = readWords(session["currentTable"], session["currentCategory"])
+
+                #If cookies says that we are in editing mode, then pass that cookie into render.
+                if session.get("editCategories") == 1:
+                    return render_template("index.html", userTables=userTables, currentTable=session["currentTable"], categories=categories, currentCategory=session["currentCategory"], words=words, editing=session["editCategories"])
+                
                 return render_template("index.html", userTables=userTables, currentTable=session["currentTable"], categories=categories, currentCategory=session["currentCategory"], words=words)
         except KeyError:
             print("There are no last tables/categories/words in cookie")
@@ -142,8 +146,8 @@ def index():
         category = strToSplit[1]
         currentTable = table
         currentCategory = category
-        print(currentTable)
-        print(currentCategory)
+        # print(currentTable)
+        # print(currentCategory)
         words = readWords(table, category)
         if len(words) == 0:
             return render_template("index.html", userTables=userTables, categories=categories)
@@ -157,6 +161,9 @@ def index():
 def manage():
     # Function to return userTables and categories
     userTables = readTables()
+
+    # Stopping editing of overview
+    session["editCategories"] = 0
     if len(userTables) == 0:
         return render_template("manage.html")
 
@@ -186,8 +193,8 @@ def addCategory():
         category = request.form.get("category")
         print(f"Trying to add category {category}")
         aCategoryToTable(table, category)
-
-    return redirect("/manage")
+        # Return user back to manage
+        return redirect("/manage")
 
 @app.route("/addWord", methods=["POST"])
 def addWord():
@@ -223,6 +230,33 @@ def changeWordOverview():
 
         return redirect("/")
 
+@app.route("/changeCategoryOverview", methods=["POST"])
+def changeCategoryOverview():
+    if request.method == "POST":
+        submit = request.form.get("submit")
+        table = request.form.get("table")
+        category = request.form.get("category")
+        word = request.form.get("word")
+        if submit == "add":
+            print(f"Trying to add category {category} to table {table}")
+            aCategoryToTable(table, category)
+            return redirect("/")
+
+        elif submit == "delete":
+            print(f"Trying to delete category {category} from table {table}")
+            dCategoryFromTable(table, category)
+            return redirect("/")
+
+        elif submit == "edit":
+            print("Trying to edit categories in overview")
+            session["editCategories"] = 1
+        
+        elif submit == "stopEdit":
+            print("Trying to stop editing categories in overview")
+            session["editCategories"] = 0
+
+        return redirect("/")
+
 
 @app.route("/deleteTable", methods=["POST"])
 def deleteTable():
@@ -245,8 +279,9 @@ def deleteCategory():
         category = strToSplit[1]
         print(f"Trying to delete from table {table} category {category}")
         dCategoryFromTable(table, category)
-
+        # Return user back to manage
         return redirect("/manage")
+
 
 @app.route("/deleteWord", methods=["POST"])
 def deleteWord():

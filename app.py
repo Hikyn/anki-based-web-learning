@@ -61,12 +61,12 @@ def categoryToTable(table, category):
         print("Such category already exists")
 
 
-def wordToCategory(table, category, word):
+def wordToCategory(table, category, word, meaning):
     # Delete Null words
     db.execute("DELETE FROM userTables WHERE main_table = ? AND user_id = ? AND category = ? AND words IS NULL", table, session["id"], category)
     if wordExists(category, word) == 0:
-        print(f"Adding word {word} to table")
-        db.execute("INSERT INTO userTables (user_id, main_table, category, words) VALUES (?, ?, ?, ?)", session["id"], table, category, word)
+        print(f"Adding word {word} to table with meaning {meaning}")
+        db.execute("INSERT INTO userTables (user_id, main_table, category, words, meaning) VALUES (?, ?, ?, ?, ?)", session["id"], table, category, word, meaning)
         flash(f"Word was added to {category}", "success")
     else:
         flash(f"Word {word} already exists in {category}", "error")
@@ -90,7 +90,7 @@ def categoryFromTable(table, category):
         flash(f"Category {category} does not exist in {table}", "error")
     return
 
-def wordFromCategory(table, category, word):
+def wordFromCategory(table, category, word, *argv):
     if wordExists(category, word) == 1:
         db.execute("DELETE FROM userTables WHERE main_table = ? AND category = ? AND words = ? AND user_id = ?", table, category, word, session["id"])
         flash(f"Word {word} was deleted from {category}", "warning")
@@ -106,7 +106,6 @@ def readTables():
     return userTables
     
 
-
 # Function to read categories from passed tables belonging to user's id
 def readCategories(userTables):
     categories = []
@@ -116,9 +115,10 @@ def readCategories(userTables):
     print(categories)
     return categories
 
+
 def readWords(table, category):
     words = []
-    words = db.execute("SELECT DISTINCT words FROM userTables WHERE user_id = ? AND main_table = ? AND category = ? ORDER BY main_table ASC", session["id"], table, category)
+    words = db.execute("SELECT DISTINCT words, meaning FROM userTables WHERE user_id = ? AND main_table = ? AND category = ? ORDER BY main_table ASC", session["id"], table, category)
     print(words)
     return words
 
@@ -144,20 +144,18 @@ def index():
         # If session remembers your last visited tables and categories, it will display them
         try:
             if session.get("editTables") == 1:
-                words = ""
                 print("EDIT table pressed")
-                return render_template("index.html", userTables=userTables, currentTable=session["currentTable"], categories=categories, currentCategory=session["currentCategory"], editTables=session["editTables"])
+                return render_template("index.html", userTables=userTables, categories=categories)
             
             if session.get("editCategories") == 1:
-                words = ""
                 print("Edit categories is pressed")
-                return render_template("index.html", userTables=userTables, currentTable=session["currentTable"], categories=categories, currentCategory=session["currentCategory"], words=words, editCategories=session["editCategories"])
+                return render_template("index.html", userTables=userTables, categories=categories)
             
             if session["currentTable"] != "" and session["currentCategory"] != "":
                 print("Table and Category are selected")
                 words = readWords(session["currentTable"], session["currentCategory"])
                 print("Rendering template with currentTable and currentCategory")
-                return render_template("index.html", userTables=userTables, currentTable=session["currentTable"], categories=categories, currentCategory=session["currentCategory"], words=words)      
+                return render_template("index.html", userTables=userTables, categories=categories, words=words)      
 
         except KeyError:
             print("There are no last tables/categories/words in cookie")
@@ -202,7 +200,6 @@ def manage():
     return render_template("manage.html", userTables=userTables, categories=categories)
 
 
-
 @app.route("/addTable", methods=["POST"])
 def addTable():
     if request.method == "POST":
@@ -211,6 +208,7 @@ def addTable():
         tableToSQL(table)
 
     return redirect("/manage")
+
 
 @app.route("/addCategory", methods=["POST"])
 def addCategory():
@@ -221,6 +219,7 @@ def addCategory():
         categoryToTable(table, category)
         # Return user back to manage
         return redirect("/manage")
+
 
 @app.route("/addWord", methods=["POST"])
 def addWord():
@@ -237,26 +236,24 @@ def addWord():
 
         return redirect("/manage")
 
-@app.route("/changeWordOverview", methods=["POST"])
-def changeWordOverview():
+
+@app.route("/changeTablesOverview", methods=["POST"])
+def changeTableOverview():
     if request.method == "POST":
         submit = request.form.get("submit")
         table = request.form.get("table")
-        category = request.form.get("category")
-        word = request.form.get("word")
-        session["editTables"] = 0
-        session["editCategories"] = 0
         if submit == "add":
-            print(f"Trying to add to table {table} category {category} WORD {word}")
-            wordToCategory(table, category, word)
+            print(f"Trying to add to table {table}")
+            tableToSQL(table)
             return redirect("/")
 
         elif submit == "delete":
-            print(f"Trying to delete from table {table} category {category} WORD {word}")
-            wordFromCategory(table, category, word)
+            print(f"Trying to delete from table {table}")
+            tableFromSQL(table)
             return redirect("/")
 
         return redirect("/")
+
 
 @app.route("/changeCategoryOverview", methods=["POST"])
 def changeCategoryOverview():
@@ -279,6 +276,7 @@ def changeCategoryOverview():
             session["currentTable"] = table
             session["currentCategory"] = ""
             print("Trying to edit categories in overview")
+            session["wordsTranslation"] = 0
             session["editTables"] = 0
             session["editCategories"] = 1
         
@@ -286,6 +284,7 @@ def changeCategoryOverview():
             session["currentTable"] = table
             session["currentCategory"] = ""
             print("Trying to stop editing categories in overview")
+            session["wordsTranslation"] = 0
             session["editTables"] = 0
             session["editCategories"] = 0
 
@@ -293,6 +292,7 @@ def changeCategoryOverview():
             session["currentTable"] = ""
             print("Trying to edit tables")
             session["currentCategory"] = ""
+            session["wordsTranslation"] = 0
             session["editCategories"] = 0
             session["editTables"] = 1
 
@@ -300,28 +300,57 @@ def changeCategoryOverview():
             session["currentTable"] = ""
             print("Trying to stop editing tables")
             session["currentCategory"] = ""
+            session["wordsTranslation"] = 0
             session["editCategories"] = 0
             session["editTables"] = 0
 
-
         return redirect("/")
 
-@app.route("/changeTablesOverview", methods=["POST"])
-def changeTableOverview():
+
+@app.route("/changeWordOverview", methods=["POST"])
+def changeWordOverview():
     if request.method == "POST":
         submit = request.form.get("submit")
         table = request.form.get("table")
+        category = request.form.get("category")
+        word = request.form.get("word")
+        meaning = request.form.get("meaning")
+        session["editTables"] = 0
+        session["editCategories"] = 0
         if submit == "add":
-            print(f"Trying to add to table {table}")
-            tableToSQL(table)
-            return redirect("/")
+            if len(word) == 0:
+                print("Empty word")
+                flash("Entered word is empty", "error")
+                return redirect("/")
+            elif len(meaning) == 0:
+                print("Empty meaning")
+                flash(f"Meaning field of word {word} is empty", "error")
+                return redirect("/")
+            print(f"Trying to add to table {table} category {category} WORD {word} MEANING {meaning}")
+            wordToCategory(table, category, word, meaning)
 
         elif submit == "delete":
-            print(f"Trying to delete from table {table}")
-            tableFromSQL(table)
-            return redirect("/")
+            print(f"Trying to delete from table {table} category {category} WORD {word}")
+            wordFromCategory(table, category, word, meaning)
+
+        elif submit == "wordsTranslation":
+            print("Trying to translate words")
+            session["wordsTranslation"] = 1
+
+        elif submit == "wordsTranslationStop":
+            print("Trying to stop translating words")
+            session["wordsTranslation"] = 0
+
+        elif submit == "editWords":
+            print("Trying to edit words")
+            session["editWords"] = 1
+
+        elif submit == "stopEditWords":
+            print("Trying to stop editing words")
+            session["editWords"] = 0
 
         return redirect("/")
+
 
 @app.route("/deleteTable", methods=["POST"])
 def deleteTable():

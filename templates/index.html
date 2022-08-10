@@ -1,9 +1,17 @@
 {% extends "layout.html" %}
 
 {% block body %}
-
+    {% with editTables = session["editTables"] %}
+    {% with editCategories = session["editCategories"] %}
+    {% with editWords = session["editWords"] %}
+    {% with currentTable = session["currentTable"] %}
+    {% with currentCategory = session["currentCategory"] %}
+    {% with successes = get_flashed_messages(category_filter=["success"]) %}
+    {% with errors = get_flashed_messages(category_filter=["error"]) %}
+    {% with warnings = get_flashed_messages(category_filter=["warning"]) %}
+    {% with wordsTranslation = session["wordsTranslation"] %}
     <div class="container-fluid marginTop">
-        {% with successes = get_flashed_messages(category_filter=["success"]) %}
+        
         {% if successes %}
             <ul>
                 {% for msg in successes %}
@@ -13,8 +21,7 @@
                 {% endfor %}
             </ul>
         {% endif %}
-        {% endwith %}
-        {% with errors = get_flashed_messages(category_filter=["error"]) %}
+        
         {% if errors %}
             <ul>
                 {% for msg in errors %}
@@ -24,8 +31,7 @@
                 {% endfor %}
             </ul>
         {% endif %}
-        {% endwith %}
-        {% with warnings = get_flashed_messages(category_filter=["warning"]) %}
+        
         {% if warnings %}
             <ul>
                 {% for msg in warnings %}
@@ -35,7 +41,6 @@
                 {% endfor %}
             </ul>
         {% endif %}
-        {% endwith %}
         <div class="row bg-light">
             <div class="col-sm-2 header-1">
                 Topics
@@ -133,25 +138,63 @@
                 Word list
                 {% endif %}
                 <div class="col-sm-8 header-1 centered">
-                    {% for word in words %}
-                    <p>{{ word["words"] }}</p>
-                    {% endfor %}
+                    {% if wordsTranslation == 1 %}
+                        {% for word in words %}
+                        <p>{{ word["words"] }} = {{ word["meaning"] }}</p>
+                        {% endfor %}
+                    {% else %}
+                        {% for word in words %}
+                        <p>{{ word["words"] }}</p>
+                        {% endfor %}
+                    {% endif %}
                 </div>
-                {% if currentCategory != ""%}
+                {% if not currentCategory == "" %}
                 <form class="col-sm-8 centered" action="/changeWordOverview" method="post">
                     <div class="mb-6">
-                        <input autocomplete="off" class="form-control col-sm-6" id="word" name="word" placeholder="Word" type="text">
-                        <input autocomplete="off" class="form-control col-sm-6" id="table" name="table" value="{{ currentTable }}" type="hidden">
-                        <input autocomplete="off" class="form-control col-sm-6" id="category" name="category" value="{{ currentCategory }}" type="hidden">
-                    </div>
-                    <div class="mb-3 btn-center">
-                        <button class="btn btn-outline-success" type="submit" name="submit" value="add">Add</button>
-                        <button class="btn btn-outline-danger" type="submit" name="submit" value="delete">Delete</button>
+                            {% if wordsTranslation == 1 %}
+                            <button class="btn btn-outline-primary col-sm-10" type="submit" name="submit" value="wordsTranslationStop">Original</button>
+                            {% else %}
+                            <button class="btn btn-outline-secondary col-sm-10" type="submit" name="submit" value="wordsTranslation">Translation</button>
+                            {% endif %}
                     </div>
                 </form>
                 {% endif %}
+                    {% if not currentCategory == '' %}
+                        {% if editWords == 1 %}
+                        <form class="col-sm-8 centered" action="/changeWordOverview" method="post">
+                            <div class="mb-6">
+                                <input autocomplete="off" class="form-control col-sm-6" id="word" name="word" placeholder="Word" type="text">
+                                <input autocomplete="off" class="form-control col-sm-6" id="meaning" name="meaning" placeholder="Meaning" type="text">
+                                <input autocomplete="off" class="form-control col-sm-6" id="table" name="table" value="{{ currentTable }}" type="hidden">
+                                <input autocomplete="off" class="form-control col-sm-6" id="category" name="category" value="{{ currentCategory }}" type="hidden">
+                            </div>
+                            <div class="mb-3 btn-center">
+                                <button class="btn btn-outline-success" type="submit" name="submit" value="add">Add</button>
+                                <button class="btn btn-outline-danger" type="submit" name="submit" value="delete">Delete</button>
+                            </div>
+                        </form>
+                        {% endif %}
+                    {% endif %}
+                <div class="col-sm-8 header-1 centered">
+                    <form action="/changeWordOverview" method="post">
+                        {% if editWords == 1 %}
+                        <button class="btn btn-outline-primary col-sm-10" type="submit" name="submit" value="stopEditWords">Stop Edit</button>
+                        {% else %}
+                        <button class="btn btn-outline-secondary col-sm-10" type="submit" name="submit" value="editWords">Edit words</button>
+                        {% endif %}
+                    </form>
+                </div>
+                
             </div>
         </div>
     </div>
-
+    {% endwith %}
+    {% endwith %}
+    {% endwith %}
+    {% endwith %}
+    {% endwith %}
+    {% endwith %}
+    {% endwith %}
+    {% endwith %}
+    {% endwith %}
 {% endblock %}

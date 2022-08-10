@@ -183,39 +183,46 @@ def index():
         return render_template("index.html", userTables=userTables, currentTable=currentTable, categories=categories, currentCategory=currentCategory, words=words)
 
 
-@app.route("/quiz", methods=["POST"])
+@app.route("/quiz", methods=["POST", "GET"])
 def quiz():
-    if request.method == "POST":
-        currentWordInt = session.get("currentWordInt")
-        print(f"Current question number {currentWordInt}")
-        table = request.form.get("table")
-        category = request.form.get("category")
-        words = readWords(table, category)
-        print(words)
-        print(f"There are {len(words)} words in category")
+    session["translateQuiz"] = 0  
+    
+    table = session.get("currentTable")
+    category = session.get("currentCategory")
+    words = readWords(table, category)
+    print(words)
+    print(f"There are {len(words)} words in category")
 
-        # If it is our first question, we randomize order
-        if session.get("currentWordInt") == 0:
-            session["randInts"] = random.sample(range(0, len(words)), len(words))
+    # If it is our first question, we randomize order
+    if session.get("currentWordInt") == 0:
+        session["randInts"] = random.sample(range(0, len(words)), len(words))
 
-        # We read randomized order into variable from cookies
-        randInts = session["randInts"]
-        print(randInts)
-        if currentWordInt > (len(words) - 1):
-            flash("You have finished the quiz!", "success")
-            print("Current position reached the end")
-            return redirect("/")
-        else:
-            session["currentWordInt"] += 1
-        word = words[randInts[currentWordInt]]
-        print(f"Picked word: {word}")
-        if len(words) == 0:
-            flash("There was no active table and category", "error")
-            return redirect("/")
-        print(f"Length of words: {len(words)}")
-        progress = int((currentWordInt / len(words)) * 100)
-        print(f"Completion percent: {progress}")
-        return render_template("quiz.html", table=table, category=category, word=word, length=len(words), progress=progress)
+    # We read randomized order into variable from cookies
+    randInts = session["randInts"]
+    print(randInts)
+
+    # Check if currentWordInt exceeding the list of words
+    if session.get("currentWordInt") > (len(words) - 1):
+        flash("You have finished the quiz!", "success")
+        print("Current position reached the end")
+        return redirect("/")
+    elif request.form.get("submit") == "next":
+        print("Next button was pressed")
+        session["currentWordInt"] += 1
+    elif request.form.get("submit") == "wordsTranslation":
+        print("User clicked Meaning")
+        session["translateQuiz"] = 1
+    currentWordInt = session.get("currentWordInt")
+    print(f"Current question number {currentWordInt}")
+    word = words[randInts[currentWordInt]]
+    print(f"Picked word: {word}")
+    if len(words) == 0:
+        flash("There was no active table and category", "error")
+        return redirect("/")
+    print(f"Length of words: {len(words)}")
+    progress = int((currentWordInt / len(words)) * 100)
+    print(f"Completion percent: {progress}")
+    return render_template("quiz.html", table=table, category=category, word=word, length=len(words), progress=progress)
 
 
 @app.route("/manage", methods=["GET", "POST"])

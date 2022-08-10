@@ -22,7 +22,10 @@
                             {% else %}
                             <button class="btn btn-outline-secondary col-sm-10" type="submit" name="submit" value="wordsTranslation">Meaning</button>
                             {% endif %}
-                        <button class="btn btn-outline-secondary col-sm-10 centered" type="submit" name="submit" value="next">Next!</button>
+                            <div>
+                                <button class="btn btn-outline-success col-sm-10 centered" type="submit" name="submit" value="correct">Correct</button>
+                                <button class="btn btn-outline-warning col-sm-10 centered" type="submit" name="submit" value="wrong">Wrong</button>
+                            </div>
                     </form>
                     <div class="progress">
                         <div class="progress-bar" role="progressbar" aria-valuenow="{{ currentQuestion }}" aria-valuemin="0" aria-valuemax="{{ length }}" style="width:{{ progress }}%"></div>

@@ -130,6 +130,8 @@ def index():
     session["id"] = 522
     session["login"] = "Hikyn"
     session["currentWordInt"] = 0
+    session["quiz"] = []
+    session["quizVisited"] = 0
 
     # Look inside of a cookie
     print(session)
@@ -185,37 +187,71 @@ def index():
 
 @app.route("/quiz", methods=["POST", "GET"])
 def quiz():
+    # If it is our first visit
+    if session["quizVisited"] == 0:
+        table = session.get("currentTable")
+        category = session.get("currentCategory")
+        words = readWords(table, category)
+        session["randInts"] = random.sample(range(0, len(words)), len(words))
+        session["quizVisited"] = 1
+        session["currentWordInt"] = 0
+        session["translateQuiz"] = 0  
+
     session["translateQuiz"] = 0  
     
+    # Get all necessary values
     table = session.get("currentTable")
     category = session.get("currentCategory")
     words = readWords(table, category)
-    print(words)
-    print(f"There are {len(words)} words in category")
 
-    # If it is our first question, we randomize order
-    if session.get("currentWordInt") == 0:
-        session["randInts"] = random.sample(range(0, len(words)), len(words))
-
-    # We read randomized order into variable from cookies
+    # We receive random seed from cookie
     randInts = session["randInts"]
     print(randInts)
 
     # Check if currentWordInt exceeding the list of words
     if session.get("currentWordInt") > (len(words) - 1):
+        currentWordInt = session.get("currentWordInt")
+        word = words[randInts[currentWordInt - 1]]
+        if request.form.get("submit") == "correct":
+            word["correctness"] = 1
+        else:
+            word["correctness"] = 0
+        session["quiz"].append(word)
         flash("You have finished the quiz!", "success")
         print("Current position reached the end")
+        print(f"Quiz cookie: {session['quiz']}")
+        # Clear current quiz
+        session["quiz"] = ""
         return redirect("/")
-    elif request.form.get("submit") == "next":
-        print("Next button was pressed")
-        session["currentWordInt"] += 1
-    elif request.form.get("submit") == "wordsTranslation":
-        print("User clicked Meaning")
-        session["translateQuiz"] = 1
+    
     currentWordInt = session.get("currentWordInt")
     print(f"Current question number {currentWordInt}")
     word = words[randInts[currentWordInt]]
     print(f"Picked word: {word}")
+
+    # Если на прошлое слово ответили "правильно"
+    if currentWordInt >= 1 and request.form.get("submit") == "correct":
+        print("Correct button was pressed")
+        session["currentWordInt"] += 1
+        prevWord = words[randInts[currentWordInt - 1]]
+        prevWord["correctness"] = 1
+        session["quiz"].append(prevWord)
+
+    # Если на прошлое слово ответили "неправильно"
+    elif currentWordInt >= 1 and request.form.get("submit") == "wrong":
+        print("Wrong button was pressed")
+        session["currentWordInt"] += 1
+        prevWord = words[randInts[currentWordInt - 1]]
+        prevWord["correctness"] = 0
+        session["quiz"].append(prevWord)
+
+    elif request.form.get("submit") == "wordsTranslation":
+        print("User clicked Meaning")
+        session["translateQuiz"] = 1
+
+    else:
+        session["currentWordInt"] += 1
+
     if len(words) == 0:
         flash("There was no active table and category", "error")
         return redirect("/")

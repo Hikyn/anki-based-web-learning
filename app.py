@@ -125,20 +125,22 @@ def index():
     if request.method == "GET":
         # If session remembers your last visited tables and categories, it will display them
         try:
+            if session.get("editTables") == 1:
+                words = ""
+                print("EDIT table pressed")
+                return render_template("index.html", userTables=userTables, currentTable=session["currentTable"], categories=categories, currentCategory=session["currentCategory"], editTables=session["editTables"])
+            
+            if session.get("editCategories") == 1:
+                words = ""
+                print("Edit categories is pressed")
+                return render_template("index.html", userTables=userTables, currentTable=session["currentTable"], categories=categories, currentCategory=session["currentCategory"], words=words, editCategories=session["editCategories"])
+            
             if session["currentTable"] != "" and session["currentCategory"] != "":
                 print("Table and Category are selected")
                 words = readWords(session["currentTable"], session["currentCategory"])
+                print("Rendering template with currentTable and currentCategory")
+                return render_template("index.html", userTables=userTables, currentTable=session["currentTable"], categories=categories, currentCategory=session["currentCategory"], words=words)      
 
-            if session.get("editTables") == 1:
-                print("EDIT table pressed")
-                return render_template("index.html", userTables=userTables, currentTable=session["currentTable"], categories=categories, currentCategory=session["currentCategory"], editTables=session["editTables"])
-            else:
-                words = ""
-                if session.get("editCategories") == 1:
-                    print("Edit categories is pressed")
-                    return render_template("index.html", userTables=userTables, currentTable=session["currentTable"], categories=categories, currentCategory=session["currentCategory"], words=words, editCategories=session["editCategories"])
-                return render_template("index.html", userTables=userTables, currentTable=session["currentTable"], categories=categories, currentCategory=session["currentCategory"], words=words)
-               
         except KeyError:
             print("There are no last tables/categories/words in cookie")
 

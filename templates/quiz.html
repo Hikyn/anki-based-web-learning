@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+
+{% block body %}
+{% with currentQuestion = session["currentWordInt"] %}
+<div class="container-fluid marginTop">
+    <div class="row bg-light">
+        <div class="col-sm-4"></div>
+        <div class="col-sm-4 centered">
+            <div class="row bg-light">
+                <div class="card noLeftPadding">
+                    <h3 class="card-header card-quiz">Quiz</h3>
+                    <h4 class="card-body card-quiz">{{ table }}</h4>
+                    <h5 class="card-body card-quiz">{{ category }}</h5>
+                    <h6 class="card-body card-quiz">[{{ currentQuestion }} / {{ length }}]</h5>
+                    <p> {{ word["words"] }}</p>
+                    <p> {{ word["meaning"] }}</p>
+                    <form action="/quiz" method="post">
+                        <input autocomplete="off" class="form-control col-sm-12" id="table" name="table" value="{{ table }}" type="hidden">
+                            <input autocomplete="off" class="form-control col-sm-12" id="category" name="category" value="{{ category }}" type="hidden">
+                        <button class="btn btn-outline-secondary col-sm-10 centered" type="submit">Next!</button>
+                    </form>
+                    <div class="progress">
+                        <div class="progress-bar" role="progressbar" aria-valuenow="{{ currentQuestion }}" aria-valuemin="0" aria-valuemax="{{ length }}" style="width:{{ progress }}%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-4"></div>
+    </div>
+    
+</div>
+
+
+{% endwith %}
+{% endblock %}

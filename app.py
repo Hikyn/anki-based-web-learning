@@ -1,5 +1,5 @@
 from cs50 import SQL
-from flask import Flask, url_for, render_template, request, session, redirect
+from flask import Flask, flash, url_for, render_template, request, session, redirect
 from flask_session import Session
 from datetime import timedelta
 
@@ -42,7 +42,9 @@ def tableToSQL(table):
     if tableExists(table) == 0:
         print("Dictionary is empty. Creating new table")
         db.execute("INSERT INTO userTables (user_id, main_table) VALUES (?, ?)", session["id"], table)
+        flash(f"Table {table} was created", "success")
     else:
+        flash(f"Table {table} already exists", "error")
         print("Dictionary exists")
 
 
@@ -53,7 +55,9 @@ def categoryToTable(table, category):
     if categoryExists(table, category) == 0:
         print(f"Adding category {category} to table")
         db.execute("INSERT INTO userTables (user_id, main_table, category) VALUES (?, ?, ?)", session["id"], table, category)
+        flash(f"Category was added to {table}", "success")
     else:
+        flash(f"Category {category} already exists in {table}", "error")
         print("Such category already exists")
 
 
@@ -63,21 +67,35 @@ def wordToCategory(table, category, word):
     if wordExists(category, word) == 0:
         print(f"Adding word {word} to table")
         db.execute("INSERT INTO userTables (user_id, main_table, category, words) VALUES (?, ?, ?, ?)", session["id"], table, category, word)
+        flash(f"Word was added to {category}", "success")
     else:
+        flash(f"Word {word} already exists in {category}", "error")
         print("Such word already exists")
 
 
 def tableFromSQL(table):
-    db.execute("DELETE FROM userTables WHERE main_table = ? AND user_id = ?", table, session["id"])
+    if tableExists(table) == 1:
+        db.execute("DELETE FROM userTables WHERE main_table = ? AND user_id = ?", table, session["id"])
+        flash(f"Table {table} was deleted", "warning")
+    else:
+        flash(f"Table {table} does not exist", "error")
     return
 
 
 def categoryFromTable(table, category):
-    db.execute("DELETE FROM userTables WHERE main_table = ? AND category = ? AND user_id = ?", table, category, session["id"])
+    if categoryExists(table, category) == 1:
+        db.execute("DELETE FROM userTables WHERE main_table = ? AND category = ? AND user_id = ?", table, category, session["id"])
+        flash(f"Category {category} was deleted from {table}", "warning")
+    else:
+        flash(f"Category {category} does not exist in {table}", "error")
     return
 
 def wordFromCategory(table, category, word):
-    db.execute("DELETE FROM userTables WHERE main_table = ? AND category = ? AND words = ? AND user_id = ?", table, category, word, session["id"])
+    if wordExists(category, word) == 1:
+        db.execute("DELETE FROM userTables WHERE main_table = ? AND category = ? AND words = ? AND user_id = ?", table, category, word, session["id"])
+        flash(f"Word {word} was deleted from {category}", "warning")
+    else:
+        flash(f"Word {word} does not exist in {category}", "error")
     return
 
 
@@ -226,6 +244,8 @@ def changeWordOverview():
         table = request.form.get("table")
         category = request.form.get("category")
         word = request.form.get("word")
+        session["editTables"] = 0
+        session["editCategories"] = 0
         if submit == "add":
             print(f"Trying to add to table {table} category {category} WORD {word}")
             wordToCategory(table, category, word)

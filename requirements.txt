@@ -1,3 +1,4 @@
 cs50
-Flask
-requests
+flask
+flask-session
+datetime

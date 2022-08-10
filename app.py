@@ -2,6 +2,7 @@ from cs50 import SQL
 from flask import Flask, flash, url_for, render_template, request, session, redirect
 from flask_session import Session
 from datetime import timedelta
+import random
 
 # Flask will use directory of app.py to search for templates and static
 app = Flask(__name__)
@@ -128,6 +129,7 @@ def index():
     # Handling cookies
     session["id"] = 522
     session["login"] = "Hikyn"
+    session["currentWordInt"] = 0
 
     # Look inside of a cookie
     print(session)
@@ -179,6 +181,41 @@ def index():
         session["currentTable"] = currentTable
         session["currentCategory"] = currentCategory
         return render_template("index.html", userTables=userTables, currentTable=currentTable, categories=categories, currentCategory=currentCategory, words=words)
+
+
+@app.route("/quiz", methods=["POST"])
+def quiz():
+    if request.method == "POST":
+        currentWordInt = session.get("currentWordInt")
+        print(f"Current question number {currentWordInt}")
+        table = request.form.get("table")
+        category = request.form.get("category")
+        words = readWords(table, category)
+        print(words)
+        print(f"There are {len(words)} words in category")
+
+        # If it is our first question, we randomize order
+        if session.get("currentWordInt") == 0:
+            session["randInts"] = random.sample(range(0, len(words)), len(words))
+
+        # We read randomized order into variable from cookies
+        randInts = session["randInts"]
+        print(randInts)
+        if currentWordInt > (len(words) - 1):
+            flash("You have finished the quiz!", "success")
+            print("Current position reached the end")
+            return redirect("/")
+        else:
+            session["currentWordInt"] += 1
+        word = words[randInts[currentWordInt]]
+        print(f"Picked word: {word}")
+        if len(words) == 0:
+            flash("There was no active table and category", "error")
+            return redirect("/")
+        print(f"Length of words: {len(words)}")
+        progress = int((currentWordInt / len(words)) * 100)
+        print(f"Completion percent: {progress}")
+        return render_template("quiz.html", table=table, category=category, word=word, length=len(words), progress=progress)
 
 
 @app.route("/manage", methods=["GET", "POST"])

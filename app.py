@@ -50,7 +50,7 @@ def aCategoryToTable(table, category):
     # Delete Null category
     db.execute("DELETE FROM userTables WHERE main_table = ? AND user_id = ? AND category IS NULL", table, session["id"])
 
-    if categoryExists(table, category, id) == 0:
+    if categoryExists(table, category) == 0:
         print(f"Adding category {category} to table")
         db.execute("INSERT INTO userTables (user_id, main_table, category) VALUES (?, ?, ?)", session["id"], table, category)
     else:
@@ -204,15 +204,22 @@ def addWord():
 
         return redirect("/manage")
 
-@app.route("/addWordOverview", methods=["POST"])
-def addWordOverview():
-    print("User visited add Word page")
+@app.route("/changeWordOverview", methods=["POST"])
+def changeWordOverview():
     if request.method == "POST":
-        word = request.form.get("wordAdd")
+        submit = request.form.get("submit")
         table = request.form.get("table")
         category = request.form.get("category")
-        print(f"Trying to add to table {table} category {category} WORD {word}")
-        aWordToCategory(table, category, word)
+        word = request.form.get("word")
+        if submit == "add":
+            print(f"Trying to add to table {table} category {category} WORD {word}")
+            aWordToCategory(table, category, word)
+            return redirect("/")
+
+        elif submit == "delete":
+            print(f"Trying to delete from table {table} category {category} WORD {word}")
+            dWordFromCategory(table, category, word)
+            return redirect("/")
 
         return redirect("/")
 
@@ -256,16 +263,6 @@ def deleteWord():
 
         return redirect("/manage")
 
-@app.route("/deleteWordOverview", methods=["POST"])
-def deleteWordOverview():
-    if request.method == "POST":
-        word = request.form.get("wordDel")
-        table = request.form.get("table")
-        category = request.form.get("category")
-        print(f"Trying to delete from table {table} category {category} WORD {word}")
-        dWordFromCategory(table, category, word)
-
-        return redirect("/")
 
 # Tests for urls at the start of flask server
 # with app.test_request_context():

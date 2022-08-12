@@ -133,6 +133,13 @@ def writeQuizResults(quiz, table, category):
             print("There are existing quiz results. Updating existing table")
             db.execute("UPDATE quiz SET correctness = ? WHERE user_id = ? AND main_table = ? AND category = ? AND word = ? AND date = ?", result["correctness"], session["id"], table, category, result["words"], date.today())
 
+
+def quizRead(date, table, category):
+    quiz = db.execute("SELECT * FROM quiz WHERE user_id = ? AND main_table = ? AND category = ? AND date = ?", session["id"], table, category, date.today())
+    print(f"Result of reading quiz for today for category {category} and table {table}")
+    return quiz
+
+
 @app.route("/", methods=["GET", "POST"])
 def index():
     # Handling cookies
@@ -141,7 +148,10 @@ def index():
     session["currentWordInt"] = 0
     session["quiz"] = []
     session["quizVisited"] = 0
-    print(date.today())
+
+    # Setting default values
+    correctAnswers = 0
+
     # Look inside of a cookie
     print(session)
 
@@ -152,13 +162,24 @@ def index():
 
     # Read categories from passed tables belonging to session ID
     categories = readCategories(userTables)
+
     
+
     if request.method == "GET":
+        # Display results of a quiz for today if there is any
+        quizResults = quizRead(date.today(), session.get("currentTable"), session.get("currentCategory"))
+        for quiz in quizResults:
+            # print("Successfully found quiz results")
+            if quiz["correctness"] == 1:
+                correctAnswers += 1
+        session["correctAnswers"] = correctAnswers
+        print(f"Right now there are {session['correctAnswers']} correct results")
+        print(f"Quiz results are: {quizResults}")
         # If session remembers your last visited tables and categories, it will display them
         try:
             if session.get("editTables") == 1:
                 print("EDIT table pressed")
-                return render_template("index.html", userTables=userTables, categories=categories)
+                return render_template("index.html", userTables=userTables, categories=categoriess)
             
             if session.get("editCategories") == 1:
                 print("Edit categories is pressed")
@@ -168,7 +189,7 @@ def index():
                 print("Table and Category are selected")
                 words = readWords(session["currentTable"], session["currentCategory"])
                 print("Rendering template with currentTable and currentCategory")
-                return render_template("index.html", userTables=userTables, categories=categories, words=words)      
+                return render_template("index.html", userTables=userTables, categories=categories, words=words, quizResults=quizResults)      
 
         except KeyError:
             print("There are no last tables/categories/words in cookie")
@@ -188,10 +209,21 @@ def index():
         words = readWords(table, category)
         if len(words) == 0:
             return render_template("index.html", userTables=userTables, categories=categories)
+
         # If category is not empty, it will render everything and store last table/category/words in cookie
         session["currentTable"] = currentTable
         session["currentCategory"] = currentCategory
-        return render_template("index.html", userTables=userTables, currentTable=currentTable, categories=categories, currentCategory=currentCategory, words=words)
+
+        # Display results of a quiz in a new category/table if there is any
+        quizResults = quizRead(date.today(), session.get("currentTable"), session.get("currentCategory"))
+        for quiz in quizResults:
+            # print("Successfully found quiz results")
+            if quiz["correctness"] == 1:
+                correctAnswers += 1
+        session["correctAnswers"] = correctAnswers
+        print(f"Right now there are {session['correctAnswers']} correct results")
+        print(f"Quiz results are: {quizResults}")
+        return render_template("index.html", userTables=userTables, currentTable=currentTable, categories=categories, currentCategory=currentCategory, words=words, quizResults=quizResults)
 
 
 @app.route("/quiz", methods=["POST", "GET"])

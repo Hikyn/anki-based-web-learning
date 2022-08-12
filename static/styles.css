@@ -31,7 +31,7 @@
     flex-direction: column;
 }
 .child {
-    height: 40px;
+    height: 30rem;
     width: 20%;
     /* background: #f00; */
     margin-left: auto;
@@ -93,4 +93,12 @@
 .card-quiz {
     padding-top: 0.2rem;
     padding-bottom: 0.2rem;
+}
+
+.quiz-correct {
+    color: darkgreen;
+}
+
+.quiz-wrong {
+    color: darkred;
 }

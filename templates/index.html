@@ -10,6 +10,7 @@
     {% with errors = get_flashed_messages(category_filter=["error"]) %}
     {% with warnings = get_flashed_messages(category_filter=["warning"]) %}
     {% with wordsTranslation = session["wordsTranslation"] %}
+    {% with correctAnswers = session["correctAnswers"] %}
     <div class="container-fluid marginTop">
         
         {% if successes %}
@@ -80,7 +81,7 @@
                                 {% if editCategories == 1 %}
                                 <form class="col-sm-12 centered" action="/changeCategoryOverview" method="post">
                                     <div class="mb-12">
-                                        <input autocomplete="off" class="form-control col-sm-12" id="category" name="category" placeholder="Category" type="text">
+                                        <input autocomplete="off" autofocus class="form-control col-sm-12" id="category" name="category" placeholder="Category" type="text">
                                         <input autocomplete="off" class="form-control col-sm-12" id="table" name="table" value="{{ currentTable }}" type="hidden">
                                     </div>
                                     <div class="mb-3 btn-center">
@@ -110,7 +111,7 @@
                 {% if editTables == 1 %}
                 <form class="col-sm-12 centered" action="/changeTablesOverview" method="post">
                     <div class="mb-12">
-                        <input autocomplete="off" class="form-control col-sm-12" id="table" name="table" placeholder="Table" type="text">
+                        <input autocomplete="off" autofocus class="form-control col-sm-12" id="table" name="table" placeholder="Table" type="text">
                     </div>
                     <div class="mb-3 btn-center">
                         <button class="btn btn-outline-success" type="submit" name="submit" value="add">Add</button>
@@ -130,9 +131,41 @@
             </div>
             <div class="col-sm-8 header-1">
                 Overview
+                {% if currentCategory != "" and words|length > 1 %}
+                <div>{{ currentCategory }} [{{correctAnswers}}/{{words|length}}]</div>
+                <div>Completion: {{(correctAnswers / words|length * 100)|int}}%</div>
+                
                 <div>
-                    Animals
+                    <canvas class="centered" id="myChart" width="200" height="200"></canvas>
                 </div>
+                <script>
+                var ctx = document.getElementById("myChart");
+                var myChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Correct', 'Wrong'],
+                    datasets: [{
+                    label: '# of Words',
+                    data: [{{correctAnswers}}, {{words|length - correctAnswers}}],
+                    rotation: 0,
+                    backgroundColor: [
+                        'rgba(75, 192, 192, 0.2)',
+                        'rgba(255, 99, 132, 0.5)'
+                    ],
+                    borderColor: [
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(255,99,132,1)'
+                    ],
+                    borderWidth: 1
+                    }]
+                },
+                options: {
+                    //cutoutPercentage: 40,
+                    responsive: false,
+
+                }
+                });
+                </script>
                 <div class="parent">
                     <div class="child">
                         <form action="/quiz" method="post">
@@ -142,6 +175,7 @@
                         </form>
                     </div>
                 </div>
+                {% endif %}
             </div>
             <div class="col-sm-2 header-1">
                 {% if currentCategory != "" %}
@@ -156,7 +190,17 @@
                         {% endfor %}
                     {% else %}
                         {% for word in words %}
-                        <p>{{ word["words"] }}</p>
+                        <p><div 
+                            {% for quizWord in quizResults %}
+                                {% if word["words"] == quizWord["word"] and quizWord["correctness"] == 1 %}
+                                class="quiz-correct"
+                                    {% set found = 1 %}
+                                {% elif word["words"] == quizWord["word"] and quizWord["correctness"] == 0 %}
+                                class="quiz-wrong"
+                                    {% set found = 1 %}
+                                {% endif %}
+                            {% endfor %}
+                        >{{ word["words"] }}</div></p>
                         {% endfor %}
                     {% endif %}
                 </div>
@@ -175,7 +219,7 @@
                     {% if editWords == 1 %}
                     <form class="col-sm-8 centered" action="/changeWordOverview" method="post">
                         <div class="mb-6">
-                            <input autocomplete="off" class="form-control col-sm-6" id="word" name="word" placeholder="Word" type="text">
+                            <input autocomplete="off" autofocus class="form-control col-sm-6" id="word" name="word" placeholder="Word" type="text">
                             <input autocomplete="off" class="form-control col-sm-6" id="meaning" name="meaning" placeholder="Meaning" type="text">
                             <input autocomplete="off" class="form-control col-sm-6" id="table" name="table" value="{{ currentTable }}" type="hidden">
                             <input autocomplete="off" class="form-control col-sm-6" id="category" name="category" value="{{ currentCategory }}" type="hidden">
@@ -200,6 +244,7 @@
             </div>
         </div>
     </div>
+    {% endwith %}
     {% endwith %}
     {% endwith %}
     {% endwith %}

@@ -119,7 +119,7 @@ def readCategories(userTables):
 
 def readWords(table, category):
     words = []
-    words = db.execute("SELECT DISTINCT words, meaning FROM userTables WHERE user_id = ? AND main_table = ? AND category = ? ORDER BY main_table ASC", session["id"], table, category)
+    words = db.execute("SELECT DISTINCT words, meaning FROM userTables WHERE user_id = ? AND main_table = ? AND category = ? ORDER BY words ASC", session["id"], table, category)
     # print(words)
     return words
 
@@ -179,7 +179,7 @@ def index():
         try:
             if session.get("editTables") == 1:
                 print("EDIT table pressed")
-                return render_template("index.html", userTables=userTables, categories=categoriess)
+                return render_template("index.html", userTables=userTables, categories=categories)
             
             if session.get("editCategories") == 1:
                 print("Edit categories is pressed")

@@ -1,7 +1,7 @@
 from cs50 import SQL
 from flask import Flask, flash, url_for, render_template, request, session, redirect
 from flask_session import Session
-from datetime import timedelta
+from datetime import date, timedelta
 import random
 
 # Flask will use directory of app.py to search for templates and static
@@ -41,12 +41,12 @@ def wordExists(category, word):
 
 def tableToSQL(table):
     if tableExists(table) == 0:
-        print("Dictionary is empty. Creating new table")
+        # print("Dictionary is empty. Creating new table")
         db.execute("INSERT INTO userTables (user_id, main_table) VALUES (?, ?)", session["id"], table)
         flash(f"Table {table} was created", "success")
     else:
         flash(f"Table {table} already exists", "error")
-        print("Dictionary exists")
+        # print("Dictionary exists")
 
 
 def categoryToTable(table, category):
@@ -54,24 +54,24 @@ def categoryToTable(table, category):
     db.execute("DELETE FROM userTables WHERE main_table = ? AND user_id = ? AND category IS NULL", table, session["id"])
 
     if categoryExists(table, category) == 0:
-        print(f"Adding category {category} to table")
+        # print(f"Adding category {category} to table")
         db.execute("INSERT INTO userTables (user_id, main_table, category) VALUES (?, ?, ?)", session["id"], table, category)
         flash(f"Category was added to {table}", "success")
     else:
         flash(f"Category {category} already exists in {table}", "error")
-        print("Such category already exists")
+        # print("Such category already exists")
 
 
 def wordToCategory(table, category, word, meaning):
     # Delete Null words
     db.execute("DELETE FROM userTables WHERE main_table = ? AND user_id = ? AND category = ? AND words IS NULL", table, session["id"], category)
     if wordExists(category, word) == 0:
-        print(f"Adding word {word} to table with meaning {meaning}")
+        # print(f"Adding word {word} to table with meaning {meaning}")
         db.execute("INSERT INTO userTables (user_id, main_table, category, words, meaning) VALUES (?, ?, ?, ?, ?)", session["id"], table, category, word, meaning)
         flash(f"Word was added to {category}", "success")
     else:
         flash(f"Word {word} already exists in {category}", "error")
-        print("Such word already exists")
+        # print("Such word already exists")
 
 
 def tableFromSQL(table):
@@ -111,18 +111,27 @@ def readTables():
 def readCategories(userTables):
     categories = []
     for table in userTables:
-        print(table["main_table"])
+        # print(table["main_table"])
         categories += db.execute("SELECT DISTINCT category, main_table FROM userTables WHERE user_id = ? AND main_table = ? ORDER BY category ASC", session["id"], table["main_table"])
-    print(categories)
+    # print(categories)
     return categories
 
 
 def readWords(table, category):
     words = []
     words = db.execute("SELECT DISTINCT words, meaning FROM userTables WHERE user_id = ? AND main_table = ? AND category = ? ORDER BY main_table ASC", session["id"], table, category)
-    print(words)
+    # print(words)
     return words
 
+def writeQuizResults(quiz, table, category):
+    for result in quiz:
+        # Если уже есть запись за сегодня - тогда ее переписываем
+        if len(db.execute("SELECT word FROM quiz WHERE user_id = ? AND main_table = ? AND category = ? AND word = ? AND date = ?", session["id"], table, category, result["words"], date.today())) == 0:
+            print("There are no results of this quiz today. Inserting results")
+            db.execute("INSERT INTO quiz (user_id, main_table, category, word, meaning, correctness, date) VALUES (?, ?, ?, ?, ?, ?, ?)", session["id"], table, category, result["words"], result["meaning"], result["correctness"], date.today())
+        else:
+            print("There are existing quiz results. Updating existing table")
+            db.execute("UPDATE quiz SET correctness = ? WHERE user_id = ? AND main_table = ? AND category = ? AND word = ? AND date = ?", result["correctness"], session["id"], table, category, result["words"], date.today())
 
 @app.route("/", methods=["GET", "POST"])
 def index():
@@ -132,7 +141,7 @@ def index():
     session["currentWordInt"] = 0
     session["quiz"] = []
     session["quizVisited"] = 0
-
+    print(date.today())
     # Look inside of a cookie
     print(session)
 
@@ -196,6 +205,7 @@ def quiz():
         session["quizVisited"] = 1
         session["currentWordInt"] = 0
         session["translateQuiz"] = 0  
+        
 
     session["translateQuiz"] = 0  
     
@@ -206,7 +216,9 @@ def quiz():
 
     # We receive random seed from cookie
     randInts = session["randInts"]
-    print(randInts)
+
+    # Check if they are staying the same
+    # print(randInts)
 
     # Check if currentWordInt exceeding the list of words
     if session.get("currentWordInt") > (len(words) - 1):
@@ -220,6 +232,7 @@ def quiz():
         flash("You have finished the quiz!", "success")
         print("Current position reached the end")
         print(f"Quiz cookie: {session['quiz']}")
+        writeQuizResults(session["quiz"], table, category)
         # Clear current quiz
         session["quiz"] = ""
         return redirect("/")

@@ -1,0 +1,38 @@
+{% extends "layout.html" %}
+
+{% block body %}
+
+<div class="container-fluid marginTop">
+    <div class="row bg-light">
+        <div class="col-sm-4"></div>
+        <div class="col-sm-4 centered">
+            <div class="row bg-light">
+                <div class="card noLeftPadding">
+                    <h3 class="card-header card-quiz">Quiz</h3>
+                    <h4 class="card-body card-quiz">{{ table }}</h4>
+                    <h5 class="card-body card-quiz">{{ category }}</h5>
+                    <h3> {{ word["word"] }}</h3>
+                    <form action="/learn" method="post">
+                        <input autocomplete="off" class="form-control col-sm-12" id="table" name="table" value="{{ table }}" type="hidden">
+                        <input autocomplete="off" class="form-control col-sm-12" id="category" name="category" value="{{ category }}" type="hidden">
+                        {% if session["translateLearn"] == 1 %}
+                        <button class="btn btn-outline-success col-sm-10" type="submit">{{ word["meaning"] }}</button>
+                        {% else %}
+                        <button class="btn btn-outline-success col-sm-10" type="submit" name="submit" value="wordsTranslation">Meaning</button>
+                        {% endif %}
+                    </form>
+                    <form action="/" method="get">
+                        <input autocomplete="off" class="form-control col-sm-12" id="table" name="table" value="{{ table }}" type="hidden">
+                        <input autocomplete="off" class="form-control col-sm-12" id="category" name="category" value="{{ category }}" type="hidden">
+                        <button class="btn btn-outline-secondary col-sm-10" type="submit">Stop learning</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-4"></div>
+    </div>
+    
+</div>
+
+
+{% endblock %}

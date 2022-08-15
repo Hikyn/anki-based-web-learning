@@ -41,6 +41,9 @@ def wordExists(category, word):
 
 def tableToSQL(table):
     if tableExists(table) == 0:
+        if len(table) <= 2:
+            flash(f"Table name {table} is shorter than 3 symbols", "error")
+            return
         # print("Dictionary is empty. Creating new table")
         db.execute("INSERT INTO userTables (user_id, main_table) VALUES (?, ?)", session["id"], table)
         flash(f"Table {table} was created", "success")
@@ -139,6 +142,23 @@ def quizRead(date, table, category):
     print(f"Result of reading quiz for today for category {category} and table {table}")
     return quiz
 
+def newOrWrongWords(table, category, words):
+    quizResults = quizRead(date.today(), table, category)
+    toLearn = []
+    # print("Words are: ", words)
+    for word in words:
+        # wordLearned ensures that we add word only once
+        wordLearned = 0
+        for quiz in quizResults:
+            if word["words"] == quiz["word"]:
+                wordLearned = 1
+                if quiz["correctness"] == 0:
+                    toLearn.append(quiz)
+                    #If word was correct on quiz, add it to new dictionary
+                # print(f"Word {word['words']} is found in quiz!")
+        if wordLearned == 0:
+            toLearn.append(word)
+    return toLearn
 
 @app.route("/", methods=["GET", "POST"])
 def index():
@@ -148,6 +168,7 @@ def index():
     session["currentWordInt"] = 0
     session["quiz"] = []
     session["quizVisited"] = 0
+    session["learnVisited"] = 0
 
     # Setting default values
     correctAnswers = 0
@@ -173,8 +194,8 @@ def index():
             if quiz["correctness"] == 1:
                 correctAnswers += 1
         session["correctAnswers"] = correctAnswers
-        print(f"Right now there are {session['correctAnswers']} correct results")
-        print(f"Quiz results are: {quizResults}")
+        # print(f"Right now there are {session['correctAnswers']} correct results")
+        # print(f"Quiz results are: {quizResults}")
         # If session remembers your last visited tables and categories, it will display them
         try:
             if session.get("editTables") == 1:
@@ -224,6 +245,45 @@ def index():
         print(f"Right now there are {session['correctAnswers']} correct results")
         print(f"Quiz results are: {quizResults}")
         return render_template("index.html", userTables=userTables, currentTable=currentTable, categories=categories, currentCategory=currentCategory, words=words, quizResults=quizResults)
+
+@app.route("/learn", methods=["POST", "GET"])
+def learn():
+    # If it is our first visi
+    table = session.get("currentTable")
+    category = session.get("currentCategory")
+    words = readWords(table, category)
+    toLearn = newOrWrongWords(table, category, words)
+    session["translateLearn"] = 0
+    if request.form.get("submit") == "wordsTranslation":
+        print("User clicked Meaning")
+        session["translateLearn"] = 1
+
+    # Если мы не в режиме перевода
+    if session["translateLearn"] == 0:
+        randomNumber = random.randint(0, len(toLearn) - 1)
+        session["randomNumber"] = randomNumber    
+        # Чистим ключ у словаря
+        if toLearn[randomNumber].get("word") == None:
+            toLearn[randomNumber]["word"] = toLearn[randomNumber].pop("words")
+        
+        # If word is the same as last word, we reroll it.
+        word = toLearn[session["randomNumber"]]
+        while word["word"] == session["lastWord"]["word"]:
+            print(f"Word {word['word']} is the same as lastWord {session['lastWord']['word']}, rerolling")
+            session["randomNumber"] = random.randint(0, len(toLearn) - 1)
+            word = toLearn[session["randomNumber"]]
+
+    else:
+        word = session["lastWord"]
+        
+    print("Последнее слово в кукисах: ", session["lastWord"]["word"])
+    print("Слово для показа: ", word["word"])
+    
+    session["lastWord"] = word
+    #print("To learn: ", toLearn)
+    if session.get("translateLearn") != 1:
+        session["translateLearn"] = 0  
+    return render_template("learn.html", table=table, category=category, word=word)
 
 
 @app.route("/quiz", methods=["POST", "GET"])

@@ -1,5 +1,5 @@
 from cs50 import SQL
-from flask import Flask, flash, url_for, render_template, request, session, redirect
+from flask import Flask, flash, url_for, render_template, request, session, redirect, send_from_directory
 from flask_session import Session
 from datetime import date, timedelta
 import random
@@ -262,6 +262,12 @@ def index():
         print(f"Right now there are {session['correctAnswers']} correct results")
         print(f"Quiz results are: {quizResults}")
         return render_template("index.html", userTables=userTables, currentTable=currentTable, categories=categories, currentCategory=currentCategory, words=words, quizResults=quizResults)
+
+
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(os.path.join(app.root_path, 'static'),
+                               'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
 
 @app.route("/login", methods=["GET", "POST"])

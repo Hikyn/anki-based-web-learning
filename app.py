@@ -3,6 +3,8 @@ from flask import Flask, flash, url_for, render_template, request, session, redi
 from flask_session import Session
 from datetime import date, timedelta
 import random
+from werkzeug.security import check_password_hash, generate_password_hash
+from functools import wraps
 
 # Flask will use directory of app.py to search for templates and static
 app = Flask(__name__)
@@ -160,11 +162,26 @@ def newOrWrongWords(table, category, words):
             toLearn.append(word)
     return toLearn
 
+def login_required(f):
+    """
+    Decorate routes to require login.
+
+    https://flask.palletsprojects.com/en/1.1.x/patterns/viewdecorators/
+    """
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if session.get("id") is None:
+            return redirect("/login")
+        return f(*args, **kwargs)
+    return decorated_function
+
 @app.route("/", methods=["GET", "POST"])
+@login_required
 def index():
     # Handling cookies
-    session["id"] = 522
-    session["login"] = "Hikyn"
+    # session["id"] = 522
+    # session["login"] = "Hikyn"
+
     session["currentWordInt"] = 0
     session["quiz"] = []
     session["quizVisited"] = 0
@@ -246,7 +263,101 @@ def index():
         print(f"Quiz results are: {quizResults}")
         return render_template("index.html", userTables=userTables, currentTable=currentTable, categories=categories, currentCategory=currentCategory, words=words, quizResults=quizResults)
 
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    """Log user in"""
+
+    # Forget any user_id
+    session.clear()
+
+    # User reached route via POST (as by submitting a form via POST)
+    if request.method == "POST":
+
+        # Ensure username was submitted
+        if not request.form.get("username"):
+            flash("Must provide username", "error")
+            return redirect("/login")
+
+        # Ensure password was submitted
+        elif not request.form.get("password"):
+            flash("Must provide password", "error")
+            return redirect("/login")
+
+        # Query database for username
+        rows = db.execute("SELECT * FROM users WHERE username = ?", request.form.get("username"))
+
+        # Ensure username exists and password is correct
+        if len(rows) != 1 or not check_password_hash(rows[0]["hash"], request.form.get("password")):
+            flash("Invalid username and/or password", "error")
+            return redirect("/login")
+
+        # Remember which user has logged in
+        session["id"] = rows[0]["id"]
+
+        # Redirect user to home page
+        return redirect("/", )
+
+    # User reached route via GET (as by clicking a link or via redirect)
+    else:
+        return render_template("login.html")
+
+
+@app.route("/logout")
+def logout():
+    """Log user out"""
+
+    # Forget any user_id
+    session.clear()
+
+    # Redirect user to login form
+    return redirect("/login")
+
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+
+    if request.method == "GET":
+        return render_template("register.html")
+
+    if request.method == "POST":
+        username = request.form.get("username")
+        password = request.form.get("password")
+        confirmation = request.form.get("confirmation")
+
+        usernames = db.execute("SELECT username FROM users")
+        registeredNames = []
+        for i in usernames:
+            registeredNames.append(i["username"])
+        print(registeredNames)
+        if " " in username or username == "":
+            flash("Username is blank", "error")
+            return redirect("/register")
+
+        elif username in registeredNames:
+            flash("Username already exists", "error")
+            return redirect("/register")
+
+        elif password != confirmation:
+            flash("Passwords do not match", "error")
+            return redirect("/register")
+
+        elif " " in password or password == "":
+            flash("Invalid password", "error")
+            return redirect("/register")
+
+        passwordHashed = generate_password_hash(password)
+        print(passwordHashed)
+        db.execute("INSERT INTO users (username, hash) VALUES (?, ?)", username, passwordHashed)
+        session["jRegistered"] = True
+        return render_template("login.html")
+
+    """Register user"""
+    return apology("TODO")
+
+
 @app.route("/learn", methods=["POST", "GET"])
+@login_required
 def learn():
     # If it is our first visi
     table = session.get("currentTable")
@@ -295,6 +406,7 @@ def learn():
 
 
 @app.route("/quiz", methods=["POST", "GET"])
+@login_required
 def quiz():
     # If it is our first visit
     if session["quizVisited"] == 0:
@@ -383,6 +495,7 @@ def quiz():
 
 
 @app.route("/manage", methods=["GET", "POST"])
+@login_required
 def manage():
     # Function to return userTables and categories
     userTables = readTables()
@@ -402,6 +515,7 @@ def manage():
 
 
 @app.route("/addTable", methods=["POST"])
+@login_required
 def addTable():
     if request.method == "POST":
         table = request.form.get("table")
@@ -412,6 +526,7 @@ def addTable():
 
 
 @app.route("/addCategory", methods=["POST"])
+@login_required
 def addCategory():
     if request.method == "POST":
         table = request.form.get("table")
@@ -423,6 +538,7 @@ def addCategory():
 
 
 @app.route("/addWord", methods=["POST"])
+@login_required
 def addWord():
     print("User visited add Word page")
     if request.method == "POST":
@@ -439,6 +555,7 @@ def addWord():
 
 
 @app.route("/changeTablesOverview", methods=["POST"])
+@login_required
 def changeTableOverview():
     if request.method == "POST":
         submit = request.form.get("submit")
@@ -457,6 +574,7 @@ def changeTableOverview():
 
 
 @app.route("/changeCategoryOverview", methods=["POST"])
+@login_required
 def changeCategoryOverview():
     if request.method == "POST":
         submit = request.form.get("submit")
@@ -509,6 +627,7 @@ def changeCategoryOverview():
 
 
 @app.route("/changeWordOverview", methods=["POST"])
+@login_required
 def changeWordOverview():
     if request.method == "POST":
         submit = request.form.get("submit")
@@ -554,6 +673,7 @@ def changeWordOverview():
 
 
 @app.route("/deleteTable", methods=["POST"])
+@login_required
 def deleteTable():
     print("User visited delete Table page")
     if request.method == "POST":
@@ -564,6 +684,7 @@ def deleteTable():
         return redirect("/manage")
 
 @app.route("/deleteCategory", methods=["POST"])
+@login_required
 def deleteCategory():
     print("User visited delete Category page")
     if request.method == "POST":
@@ -579,6 +700,7 @@ def deleteCategory():
 
 
 @app.route("/deleteWord", methods=["POST"])
+@login_required
 def deleteWord():
     print("User visited delete Word page")
     if request.method == "POST":

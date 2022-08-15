@@ -263,8 +263,9 @@ def learn():
         randomNumber = random.randint(0, len(toLearn) - 1)
         session["randomNumber"] = randomNumber    
         # Чистим ключ у словаря
-        if toLearn[randomNumber].get("word") == None:
-            toLearn[randomNumber]["word"] = toLearn[randomNumber].pop("words")
+        for word in toLearn:
+            if word.get("word") == None:
+                word["word"] = word.pop("words")
         
         # If word is the same as last word, we reroll it.
         word = toLearn[session["randomNumber"]]

@@ -45,9 +45,8 @@
         <div class="row bg-light">
             <div class="col-sm-4 col-md-4 col-lg-2 header-1 ">
                 Topics
-                <div class="row centered noMargin control-scroll">
+                <div class="row centered noMargin control-scroll align-content-start">
                     {% for table in userTables %}
-                    
                     <div class="row">
                         <div class="col-sm-12 header-1">
                             <div class="card card-block centered">
@@ -57,9 +56,9 @@
                             </div>
                             
                             {% if currentTable == table["main_table"] %}
-                            <div class="col-sm-12 collapse show align-items-start" id="table{{ table["main_table"] }}">
+                            <div class="col-sm-12 collapse show" id="table{{ table["main_table"] }}">
                             {% else %}
-                            <div class="col-sm-12 collapse align-items-start" id="table{{ table["main_table"] }}">
+                            <div class="col-sm-12 collapse" id="table{{ table["main_table"] }}">
                             {% endif %}
                                 <div class="card card-body">
                                     {% for unit in categories %}

@@ -112,7 +112,7 @@
 @media (min-height: 900px)
 {
     .control-scroll {
-        height:600px;
+        
         overflow-y: auto;
     }
 }

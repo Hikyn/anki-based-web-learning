@@ -3,6 +3,7 @@ from flask import Flask, flash, url_for, render_template, request, session, redi
 from flask_session import Session
 from datetime import date, timedelta
 import random
+import os
 from werkzeug.security import check_password_hash, generate_password_hash
 from functools import wraps
 
@@ -181,11 +182,11 @@ def index():
     # Handling cookies
     # session["id"] = 522
     # session["login"] = "Hikyn"
-
     session["currentWordInt"] = 0
     session["quiz"] = []
     session["quizVisited"] = 0
     session["lastWord"] = []
+    
 
     # Setting default values
     correctAnswers = 0
@@ -236,6 +237,7 @@ def index():
         return render_template("index.html", userTables=userTables, categories=categories)
 
     if request.method == "POST":
+        session["firstLogin"] = 0
         strToSplit = request.form.get("request")
         strToSplit = strToSplit.split("-")
         table = strToSplit[0]
@@ -300,6 +302,7 @@ def login():
 
         # Remember which user has logged in
         session["id"] = rows[0]["id"]
+        session["firstLogin"] = 1
 
         # Redirect user to home page
         return redirect("/", )

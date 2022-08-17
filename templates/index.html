@@ -11,6 +11,7 @@
     {% with warnings = get_flashed_messages(category_filter=["warning"]) %}
     {% with wordsTranslation = session["wordsTranslation"] %}
     {% with correctAnswers = session["correctAnswers"] %}
+    {% with firstLogin = session["firstLogin"] %}
     <div class="container-fluid marginTop">
         
         {% if successes %}
@@ -62,7 +63,7 @@
                             {% endif %}
                                 <div class="card card-body">
                                     {% for unit in categories %}
-                                    {% if table["main_table"] in unit["main_table"] %}
+                                    {% if table["main_table"] == unit["main_table"] %}
 
                                     {% if currentCategory == unit["category"] %}
                                     <form action="/" method="post">
@@ -183,8 +184,11 @@
                                 Getting started
                             </a> 
                         </div>
-
+                        {% if firstLogin == 1 %}
+                        <div class="col-sm-12 flex-md-last collapse show" id="faq">
+                        {% else %}
                         <div class="col-sm-12 flex-md-last collapse" id="faq">
+                        {% endif %}
                             <h5>1. You can add <strong>Topics</strong> to learn by pressing "Edit topics" button. </h5>
                             <h6>Example topic: EnglishB1</h6>
 
@@ -195,6 +199,7 @@
                             <h6>Example word: Cat.</h6>
                         </div>
                     </div>
+                    {% if firstLogin == 0 %}
                     <div class="col-sm-12 header-1">
                         <div class="card card-block centered">
                             <a class="btn btn-secondary" href="#faq2" role="button" data-bs-toggle="collapse" aria-expanded="false" aria-controls="faq2">
@@ -209,6 +214,7 @@
                             <h5>You can <strong>Learn</strong> all words that were incorrect or which are new addition to a Word list.</h5>
                         </div>
                     </div>
+                    {% endif %}
                 </div>
             </div>
             <div class="col-sm-4 col-md-4 col-lg-2 header-1">
@@ -278,6 +284,7 @@
             </div>
         </div>
     </div>
+    {% endwith %}
     {% endwith %}
     {% endwith %}
     {% endwith %}

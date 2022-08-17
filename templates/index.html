@@ -47,6 +47,7 @@
                 Topics
                 <div class="row centered noMargin control-scroll">
                     {% for table in userTables %}
+                    
                     <div class="row">
                         <div class="col-sm-12 header-1">
                             <div class="card card-block centered">
@@ -56,9 +57,9 @@
                             </div>
                             
                             {% if currentTable == table["main_table"] %}
-                            <div class="col-sm-12 flex-md-last collapse show" id="table{{ table["main_table"] }}">
+                            <div class="col-sm-12 collapse show align-items-start" id="table{{ table["main_table"] }}">
                             {% else %}
-                            <div class="col-sm-12 flex-md-last collapse" id="table{{ table["main_table"] }}">
+                            <div class="col-sm-12 collapse align-items-start" id="table{{ table["main_table"] }}">
                             {% endif %}
                                 <div class="card card-body">
                                     {% for unit in categories %}
@@ -102,10 +103,8 @@
                                     </form>
                                 </div>
                             </div>
-                            
                         </div>
                     </div>
-                    
                     {% endfor %}
                 </div>
                 {% if editTables == 1 %}
@@ -178,6 +177,40 @@
                     <input autocomplete="off" class="form-control" id="category" name="category" value="{{ currentCategory }}" type="hidden">
                 </form>
                 {% endif %}
+                <div class="row">
+                    <div class="col-sm-12 header-1">
+                        <div class="card card-block centered">
+                            <a class="btn btn-secondary" href="#faq" role="button" data-bs-toggle="collapse" aria-expanded="false" aria-controls="faq">
+                                Getting started
+                            </a> 
+                        </div>
+
+                        <div class="col-sm-12 flex-md-last collapse" id="faq">
+                            <h5>1. You can add <strong>Topics</strong> to learn by pressing "Edit topics" button. </h5>
+                            <h6>Example topic: EnglishB1</h6>
+
+                            <h5>2. After that you can expand topic and add <strong>Category</strong> inside of it by pressing "Edit". </h5>
+                            <h6>Example category: Animals.</h6>
+
+                            <h5>3. Final step is to select created <strong>Category</strong> and add <strong>Words</strong> to it. Button will be on the right or at the bottom of a screen depending on screen resolution.</h5>
+                            <h6>Example word: Cat.</h6>
+                        </div>
+                    </div>
+                    <div class="col-sm-12 header-1">
+                        <div class="card card-block centered">
+                            <a class="btn btn-secondary" href="#faq2" role="button" data-bs-toggle="collapse" aria-expanded="false" aria-controls="faq2">
+                                Quiz and learn functionality
+                            </a> 
+                        </div>
+
+                        <div class="col-sm-12 flex-md-last collapse" id="faq2">
+                            <h5><strong>Quiz</strong> allows to take test of all words in category.</h5>
+                            <h6>Depending on a results of a <strong>Quiz</strong>, you will see completion chart, as well as all words that you got right or wrong.</h6>
+                            
+                            <h5>You can <strong>Learn</strong> all words that were incorrect or which are new addition to a Word list.</h5>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="col-sm-4 col-md-4 col-lg-2 header-1">
                 {% if currentCategory != "" %}

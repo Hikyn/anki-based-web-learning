@@ -19,10 +19,11 @@ app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=28)
 
 # Configure CS50 Library to use SQLite database
 #db = SQL("sqlite:///app.db")
-uri = os.getenv("postgres://hphffpxfwzsooz:d05122abcf50369c16faab99e383b32c55e0146ec47db763c51f501506e86faa@ec2-52-212-228-71.eu-west-1.compute.amazonaws.com:5432/df6gjgtv751q0f")
-if uri.startswith("postgres://"):
-    uri = uri.replace("postgres://", "postgresql://")
-db = SQL(uri)
+SQLALCHEMY_DATABASE_URI = os.environ.get('postgres://hphffpxfwzsooz:d05122abcf50369c16faab99e383b32c55e0146ec47db763c51f501506e86faa@ec2-52-212-228-71.eu-west-1.compute.amazonaws.com:5432/df6gjgtv751q0f')
+#uri = os.getenv("postgres://hphffpxfwzsooz:d05122abcf50369c16faab99e383b32c55e0146ec47db763c51f501506e86faa@ec2-52-212-228-71.eu-west-1.compute.amazonaws.com:5432/df6gjgtv751q0f")
+#if uri.startswith("postgres://"):
+#    uri = uri.replace("postgres://", "postgresql://")
+db = SQLAlchemy(app)
 
 # Check if there are any tables with that name and user_id
 def tableExists(table):

@@ -1,0 +1,48 @@
+{% extends "layout.html" %}
+
+{% block body %}
+{% with successes = get_flashed_messages(category_filter=["success"]) %}
+{% with errors = get_flashed_messages(category_filter=["error"]) %}
+{% with warnings = get_flashed_messages(category_filter=["warning"]) %}
+{% if successes %}
+        <ul>
+            {% for msg in successes %}
+                <div class="alert alert-success" role="alert">
+                    {{ msg }}
+                </div>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    
+    {% if errors %}
+        <ul>
+            {% for msg in errors %}
+                <div class="alert alert-danger" role="alert">
+                    {{ msg }}
+                </div>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    
+    {% if warnings %}
+        <ul>
+            {% for msg in warnings %}
+                <div class="alert alert-warning" role="alert">
+                    {{ msg }}
+                </div>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    <form action="/login" method="post">
+        <div class="mb-3">
+            <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="username" name="username" placeholder="Username" type="text">
+        </div>
+        <div class="mb-3 centered">
+            <input class="form-control mx-auto w-auto" id="password" name="password" placeholder="Password" type="password">
+            <button class="btn btn-primary centered" type="submit">Log In</button>
+        </div>
+    </form>
+{% endwith %}
+{% endwith %}
+{% endwith %}
+{% endblock %}

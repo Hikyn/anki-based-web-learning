@@ -1,6 +1,7 @@
 from cs50 import SQL
 from flask import Flask, flash, url_for, render_template, request, session, redirect, send_from_directory
 from flask_session import Session
+from flask_sqlalchemy import SQLAlchemy
 from datetime import date, timedelta
 import random
 import os

@@ -5,7 +5,9 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import date, timedelta
 import random
 import os
+#from os import path
 import re
+#import sqlite3
 from werkzeug.security import check_password_hash, generate_password_hash
 from functools import wraps
 
@@ -19,7 +21,9 @@ app.secret_key = "af3c081ff9e7c80f132f848ea44f0a1fd89cf5388a517edbe268dcb3d9f57c
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=28)
 
+#ROOT = path.dirname(path.realpath(__file__))
 # Configure CS50 Library to use SQLite database
+# db = sqlite3.connect(path.join(ROOT, "data.db"))
 db = SQL("sqlite:///data.db")
 #SQLALCHEMY_DATABASE_URI = os.environ.get('postgres://hphffpxfwzsooz:d05122abcf50369c16faab99e383b32c55e0146ec47db763c51f501506e86faa@ec2-52-212-228-71.eu-west-1.compute.amazonaws.com:5432/df6gjgtv751q0f')
 #uri = os.getenv("postgres://hphffpxfwzsooz:d05122abcf50369c16faab99e383b32c55e0146ec47db763c51f501506e86faa@ec2-52-212-228-71.eu-west-1.compute.amazonaws.com:5432/df6gjgtv751q0f")
@@ -286,7 +290,7 @@ def index():
         session["correctAnswers"] = correctAnswers
         print(f"Right now there are {session['correctAnswers']} correct results")
         print(f"Quiz results are: {quizResults}")
-        if session["editCategories"] == 1 and session["firstLogin"] == 1:
+        if session.get("editCategories") == 1 and session.get("firstLogin") == 1:
             session["wordGlow"] = 1
         return render_template("index.html", userTables=userTables, currentTable=currentTable, categories=categories, currentCategory=currentCategory, words=words, quizResults=quizResults)
 

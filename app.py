@@ -25,7 +25,8 @@ app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=28)
 #uri = os.getenv("postgres://hphffpxfwzsooz:d05122abcf50369c16faab99e383b32c55e0146ec47db763c51f501506e86faa@ec2-52-212-228-71.eu-west-1.compute.amazonaws.com:5432/df6gjgtv751q0f")
 #if uri.startswith("postgres://"):
 #    uri = uri.replace("postgres://", "postgresql://")
-uri = os.getenv("postgres://hphffpxfwzsooz:d05122abcf50369c16faab99e383b32c55e0146ec47db763c51f501506e86faa@ec2-52-212-228-71.eu-west-1.compute.amazonaws.com:5432/df6gjgtv751q0f")  # or other relevant config var
+uri = os.environ.get("DATABASE_URL")  # or other relevant config var
+print(uri)
 if uri.startswith("postgres://"):
     uri = uri.replace("postgres://", "postgresql://", 1)
 db = SQL(uri)

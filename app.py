@@ -10,6 +10,7 @@ import re
 #import sqlite3
 from werkzeug.security import check_password_hash, generate_password_hash
 from functools import wraps
+import urllib.parse
 
 # Flask will use directory of app.py to search for templates and static
 app = Flask(__name__)
@@ -55,8 +56,13 @@ def wordExists(category, word):
 
 def tableToSQL(table):
     if tableExists(table) == 0:
+        print(table)
         if len(table) <= 2:
             flash(f"Table name {table} is shorter than 3 symbols", "error")
+            return
+        elif " " in table or not table.isalpha():
+            print("SPACE!")
+            flash("Table name should consist only of alphabetical characters without spaces", "error")
             return
         # print("Dictionary is empty. Creating new table")
         db.execute("INSERT INTO userTables (user_id, main_table) VALUES (?, ?)", session["id"], table)
@@ -198,6 +204,7 @@ def index():
     session["quiz"] = []
     session["quizVisited"] = 0
     session["lastWord"] = []
+    session["tableEncoded"] = []
     
 
     # Setting default values
@@ -266,7 +273,7 @@ def index():
     if request.method == "POST":
         
         strToSplit = request.form.get("request")
-        strToSplit = strToSplit.split("-")
+        strToSplit = strToSplit.split("$%$#@")
         table = strToSplit[0]
         category = strToSplit[1]
         currentTable = table
@@ -280,6 +287,13 @@ def index():
 
         # If category is not empty, it will render everything and store last table/category/words in cookie
         session["currentTable"] = currentTable
+        print(currentTable)
+
+        for table in userTables:
+            session["tableEncoded"].append(urllib.parse.quote(table["main_table"]))
+
+        print(f"Encoded: {session['tableEncoded']}")
+
         session["currentCategory"] = currentCategory
 
         # Display results of a quiz in a new category/table if there is any

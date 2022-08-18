@@ -15,6 +15,7 @@
     {% with categoryGlow = session["categoryGlow"] %}
     {% with wordGlow = session["wordGlow"] %}
     {% with tableGlow = session["tableGlow"] %}
+    {% with tableEncoded = session["tableEncoded"] %}
     <div class="container-fluid marginTop">
         
         {% if successes %}
@@ -70,11 +71,11 @@
 
                                     {% if currentCategory == unit["category"] %}
                                     <form action="/" method="post">
-                                        <button name="request" class="category category-active" value="{{ unit["main_table"] }}-{{ unit["category"] }}">{{ unit["category"] }}</button>
+                                        <button name="request" class="category category-active" value="{{ unit["main_table"] }}$%$#@{{ unit["category"] }}">{{ unit["category"] }}</button>
                                     </form>
                                     {% else %}
                                     <form action="/" method="post">
-                                        <button name="request" class="category" value="{{ unit["main_table"] }}-{{ unit["category"] }}">{{ unit["category"] }}</button>
+                                        <button name="request" class="category" value="{{ unit["main_table"] }}$%$#@{{ unit["category"] }}">{{ unit["category"] }}</button>
                                     </form>
                                     {% endif %}
 
@@ -294,6 +295,7 @@
             </div>
         </div>
     </div>
+    {% endwith %}
     {% endwith %}
     {% endwith %}
     {% endwith %}

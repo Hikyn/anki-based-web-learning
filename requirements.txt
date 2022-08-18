@@ -14,7 +14,6 @@ cryptography==3.4.8
 cs50==9.2.2
 dbus-python==1.2.18
 distro==1.7.0
-distro-info===1.1build1
 docopt==0.6.2
 Flask==2.2.1
 Flask-Session==0.4.0

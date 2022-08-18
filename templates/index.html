@@ -12,6 +12,9 @@
     {% with wordsTranslation = session["wordsTranslation"] %}
     {% with correctAnswers = session["correctAnswers"] %}
     {% with firstLogin = session["firstLogin"] %}
+    {% with categoryGlow = session["categoryGlow"] %}
+    {% with wordGlow = session["wordGlow"] %}
+    {% with tableGlow = session["tableGlow"] %}
     <div class="container-fluid marginTop">
         
         {% if successes %}
@@ -44,13 +47,13 @@
             </ul>
         {% endif %}
         <div class="row bg-light">
-            <div class="col-sm-4 col-md-4 col-lg-2 header-1 ">
+            <div class="col-sm-4 col-md-4 col-lg-2 header-1">
                 Topics
                 <div class="row centered noMargin control-scroll align-content-start">
                     {% for table in userTables %}
                     <div class="row">
                         <div class="col-sm-12 header-1">
-                            <div class="card card-block centered">
+                            <div class="card card-block centered blink-me">
                                 <a class="btn btn-secondary" href="#table{{ table["main_table"] }}" role="button" data-bs-toggle="collapse" aria-expanded="false" aria-controls="table{{ table["main_table"] }}">
                                     {{ table["main_table"] }}
                                 </a> 
@@ -96,6 +99,9 @@
                                         {% if editCategories == 1 %}
                                         <button class="btn btn-outline-primary col-sm-12" type="submit" name="submit" value="stopEditCategory">Stop Edit</button>
                                         <input autocomplete="off" class="form-control col-sm-12" id="table" name="table" value="{{ table["main_table"] }}" type="hidden">
+                                        {% elif categoryGlow == 1 %}
+                                        <button class="btn btn-success col-sm-12" type="submit" name="submit" value="editCategory">Edit</button>
+                                        <input autocomplete="off" class="form-control col-sm-12" id="table" name="table" value="{{ table["main_table"] }}" type="hidden">
                                         {% else %}
                                         <button class="btn btn-outline-secondary col-sm-12" type="submit" name="submit" value="editCategory">Edit</button>
                                         <input autocomplete="off" class="form-control col-sm-12" id="table" name="table" value="{{ table["main_table"] }}" type="hidden">
@@ -122,6 +128,8 @@
                     <form action="/changeCategoryOverview" method="post">
                         {% if editTables == 1 %}
                         <button class="btn btn-outline-primary col-sm-10 btn-fit" type="submit" name="submit" value="stopEditTables">Stop Edit</button>
+                        {% elif tableGlow == 1 %}
+                        <button class="btn btn-success col-sm-10 btn-fit" type="submit" name="submit" value="editTables">Edit topics</button>
                         {% else %}
                         <button class="btn btn-outline-secondary col-sm-10 btn-fit" type="submit" name="submit" value="editTables">Edit topics</button>
                         {% endif %}
@@ -274,6 +282,8 @@
                     <form action="/changeWordOverview" method="post">
                         {% if editWords == 1 %}
                         <button class="btn btn-outline-primary col-sm-10" type="submit" name="submit" value="stopEditWords">Stop Edit</button>
+                        {% elif wordGlow == 1 %}
+                        <button class="btn btn-success col-sm-10" type="submit" name="submit" value="editWords">Edit</button>
                         {% else %}
                         <button class="btn btn-outline-secondary col-sm-10" type="submit" name="submit" value="editWords">Edit</button>
                         {% endif %}
@@ -284,6 +294,9 @@
             </div>
         </div>
     </div>
+    {% endwith %}
+    {% endwith %}
+    {% endwith %}
     {% endwith %}
     {% endwith %}
     {% endwith %}

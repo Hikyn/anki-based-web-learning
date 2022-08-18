@@ -73,6 +73,7 @@ def wordToCategory(table, category, word, meaning):
     db.execute("DELETE FROM userTables WHERE main_table = ? AND user_id = ? AND category = ? AND words IS NULL", table, session["id"], category)
     if wordExists(category, word) == 0:
         # print(f"Adding word {word} to table with meaning {meaning}")
+        session["firstLogin"] = 0
         db.execute("INSERT INTO userTables (user_id, main_table, category, words, meaning) VALUES (?, ?, ?, ?, ?)", session["id"], table, category, word, meaning)
         flash(f"Word was added to {category}", "success")
     else:
@@ -197,10 +198,18 @@ def index():
     # Read tables belonging to session ID
     userTables = readTables()
     if len(userTables) == 0:
+        session["tableGlow"] = 1
         return render_template("index.html")
-
+    else:
+        session["tableGlow"] = 0
     # Read categories from passed tables belonging to session ID
     categories = readCategories(userTables)
+    print(categories)
+    if len(categories) == 1 and categories[0]["category"] == None:
+        print("No categories")
+        session["categoryGlow"] = 1
+    else:
+        session["categoryGlow"] = 0
 
     
 
@@ -227,6 +236,13 @@ def index():
             if session["currentTable"] != "" and session["currentCategory"] != "":
                 print("Table and Category are selected")
                 words = readWords(session["currentTable"], session["currentCategory"])
+                for word in words:
+                    if word == None:
+                        print("Words should glow")
+                        session["wordGlow"] = 1
+                    else: 
+                        print("Words don't glow")
+                        session["wordGlow"] = 0
                 print("Rendering template with currentTable and currentCategory")
                 return render_template("index.html", userTables=userTables, categories=categories, words=words, quizResults=quizResults)      
 
@@ -237,7 +253,7 @@ def index():
         return render_template("index.html", userTables=userTables, categories=categories)
 
     if request.method == "POST":
-        session["firstLogin"] = 0
+        
         strToSplit = request.form.get("request")
         strToSplit = strToSplit.split("-")
         table = strToSplit[0]
@@ -248,6 +264,7 @@ def index():
         # print(currentCategory)
         words = readWords(table, category)
         if len(words) == 0:
+            print("No words")
             return render_template("index.html", userTables=userTables, categories=categories)
 
         # If category is not empty, it will render everything and store last table/category/words in cookie
@@ -263,6 +280,8 @@ def index():
         session["correctAnswers"] = correctAnswers
         print(f"Right now there are {session['correctAnswers']} correct results")
         print(f"Quiz results are: {quizResults}")
+        if session["editCategories"] == 1 and session["firstLogin"] == 1:
+            session["wordGlow"] = 1
         return render_template("index.html", userTables=userTables, currentTable=currentTable, categories=categories, currentCategory=currentCategory, words=words, quizResults=quizResults)
 
 

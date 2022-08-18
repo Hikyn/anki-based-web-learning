@@ -60,9 +60,9 @@ def tableToSQL(table):
         if len(table) <= 2:
             flash(f"Table name {table} is shorter than 3 symbols", "error")
             return
-        elif " " in table or not table.isalpha():
+        elif " " in table or not table.isalnum():
             print("SPACE!")
-            flash("Table name should consist only of alphabetical characters without spaces", "error")
+            flash("Table name should consist only of alphabetical|numerical characters without spaces", "error")
             return
         # print("Dictionary is empty. Creating new table")
         db.execute("INSERT INTO userTables (user_id, main_table) VALUES (?, ?)", session["id"], table)

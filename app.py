@@ -203,7 +203,7 @@ def index():
     session["currentWordInt"] = 0
     session["quiz"] = []
     session["quizVisited"] = 0
-    session["lastWord"] = []
+    session["lastWord"] = {}
     session["tableEncoded"] = []
     
 

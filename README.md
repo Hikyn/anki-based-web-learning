@@ -36,3 +36,5 @@ After this project I decided to take JavaScript learning journey, because it sho
 </details>
 
 <b>Live at</b>: https://hikyn.pythonanywhere.com/
+
+<b>View my full portfolio</b>: https://hikyn.dev/

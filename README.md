@@ -24,6 +24,12 @@
   <img src="https://img.shields.io/badge/SQLite-07405E?style=for-the-badge&logo=sqlite&logoColor=white" />
 </a>
 
+
+## Live at:
+<b>Live at</b>: https://hikyn.pythonanywhere.com/
+
+## Overview:
+
 This project was made after CS50 Computer Science course. I didn't know JS and CSS well enough at that time, so it was made with Bootstrap and cookies to make application dynamic. 
 
 After this project I decided to take JavaScript learning journey, because it showed how much I am limited in website creation without it.
@@ -34,7 +40,5 @@ After this project I decided to take JavaScript learning journey, because it sho
 <img src="static/preview1.gif " height="500"/>
 <img src="static/preview2.gif " height="500"/>
 </details>
-
-<b>Live at</b>: https://hikyn.pythonanywhere.com/
 
 <b>View my full portfolio</b>: https://hikyn.dev/
